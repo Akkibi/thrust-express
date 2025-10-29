@@ -41,13 +41,14 @@ export class Player {
     return this.instanceGroup.position;
   }
 
-  public update(time: number, deltatime: number): Matter.Body {
+  public update(time: number, deltatime: number): void {
     const body = this.body;
 
+    const rotation = -body.angle + Math.PI / 2;
     const position = new THREE.Vector3(body.position.x, 0, body.position.y);
     const newPos = mapCoords(position, false);
 
+    this.instanceGroup.rotation.set(0, rotation, 0);
     this.instanceGroup.position.set(newPos.x, newPos.y, newPos.z);
-    return body;
   }
 }

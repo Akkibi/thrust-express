@@ -6,6 +6,7 @@ import Stats from "stats.js";
 import { PhysicsEngine } from "../matter/physics";
 import { Player } from "./player";
 import { useStore } from "../store/store";
+import { PointerHandler } from "../utils/touchHandler";
 // import { FallingManager } from "./fallingManager";
 
 export class SceneManager {
@@ -19,13 +20,15 @@ export class SceneManager {
   private stats: Stats;
   private player: Player;
   private physicsEngine: PhysicsEngine;
-  // private fallingManager: FallingManager;
+  public pointerHandler: PointerHandler;
 
-  private constructor(canvas: HTMLDivElement | null) {
+  private constructor(canvas: HTMLDivElement) {
     // stats
-    this.physicsEngine = PhysicsEngine.getInstance();
     this.stats = new Stats();
-    // document.body.appendChild(this.stats.dom);
+    document.body.appendChild(this.stats.dom);
+
+    this.pointerHandler = PointerHandler.getInstance(canvas, {});
+    this.physicsEngine = PhysicsEngine.getInstance();
     this.scene = new THREE.Scene();
     this.player = Player.getInstance(
       this.scene,
@@ -39,7 +42,10 @@ export class SceneManager {
     this.renderer.init();
     this.renderer.shadowMap.enabled = true;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.camera = CameraManager.getInstance(this.scene);
+    this.camera = CameraManager.getInstance(
+      this.scene,
+      this.physicsEngine.getPlayer(),
+    );
     this.env = Environement.getInstance(this.scene);
     // ambian light
     const ambientLight = new THREE.AmbientLight(0x9090c0);
@@ -57,7 +63,7 @@ export class SceneManager {
 
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.scene.environment = null;
-    this.scene.background = new THREE.Color(0x111121);
+    this.scene.background = new THREE.Color(0x000000);
   }
 
   public static getInstance(canvas: HTMLDivElement | null): SceneManager {
@@ -89,11 +95,11 @@ export class SceneManager {
   private animate(time: number, deltatime: number) {
     this.stats.begin();
     this.renderer.render(this.scene, this.camera.getCamera());
-    // this.camera.update(time, deltatime);
     if (useStore.getState().isPaused && time > 0.2) return;
     this.physicsEngine.update(deltatime);
 
     this.player.update(time, deltatime);
+    this.camera.update(time, deltatime);
 
     this.stats.end();
   }

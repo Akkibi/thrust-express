@@ -1,11 +1,14 @@
 import * as THREE from "three/webgpu";
+import { mapCoords } from "../matter/physics";
 
 export class CameraManager {
   private static instance: CameraManager;
   private camera: THREE.PerspectiveCamera;
   private cameraGroup: THREE.Group;
+  private player: Matter.Body;
 
-  private constructor(scene: THREE.Scene) {
+  private constructor(scene: THREE.Scene, player: Matter.Body) {
+    this.player = player;
     this.camera = new THREE.PerspectiveCamera(
       40,
       window.innerWidth / window.innerHeight,
@@ -13,11 +16,11 @@ export class CameraManager {
       1000,
     );
     this.cameraGroup = new THREE.Group();
-    this.cameraGroup.position.set(0, 2, -7);
+    this.cameraGroup.position.set(0, 0, 0);
     scene.add(this.cameraGroup);
-    this.camera.position.set(0, 0, 0);
     this.camera.rotation.set(Math.PI, 0, Math.PI);
     this.cameraGroup.add(this.camera);
+    this.camera.position.set(0, 2, -7);
     this.camera.lookAt(0, 0, 0);
 
     window.addEventListener("resize", () => {
@@ -26,9 +29,12 @@ export class CameraManager {
     });
   }
 
-  public static getInstance(scene: THREE.Scene): CameraManager {
+  public static getInstance(
+    scene: THREE.Scene,
+    player: Matter.Body,
+  ): CameraManager {
     if (!CameraManager.instance) {
-      CameraManager.instance = new CameraManager(scene);
+      CameraManager.instance = new CameraManager(scene, player);
     }
     return CameraManager.instance;
   }
@@ -37,7 +43,14 @@ export class CameraManager {
     return this.camera;
   }
 
-  // public update(time: number, deltatime: number): void {
-  //   this.camera.position.y = Math.sin(time * 0.001 * deltatime) * 0.1;
-  // }
+  public update(time: number, deltatime: number): void {
+    const position = new THREE.Vector3(
+      this.player.position.x,
+      0,
+      this.player.position.y,
+    );
+    const newPos = mapCoords(position, false);
+
+    this.cameraGroup.position.set(newPos.x, newPos.y, newPos.z);
+  }
 }
