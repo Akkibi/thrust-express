@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { eventEmitter } from "../utils/eventEmitter";
 import type {
-  PointerEndDataType,
   PointerMoveDataType,
   PointerStartData,
 } from "../utils/touchHandler";
@@ -45,7 +44,7 @@ const Controller = () => {
       controllerKnob.style.top = `${y}px`;
     };
 
-    const handleUp = (e: PointerEndDataType) => {
+    const handleUp = () => {
       controller.style.display = "none";
     };
 
@@ -80,8 +79,8 @@ const Controller = () => {
       handleMove(e);
     });
 
-    eventEmitter.on("PointerEnd", (e: PointerEndDataType) => {
-      handleUp(e);
+    eventEmitter.on("PointerEnd", () => {
+      handleUp();
     });
 
     console.log("controller mounted");

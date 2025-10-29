@@ -1,6 +1,8 @@
 import * as THREE from "three/webgpu";
 import { mapCoords } from "../matter/physics";
 
+const cameraDefaultPosion = new THREE.Vector3(0, 2, 7);
+
 export class CameraManager {
   private static instance: CameraManager;
   private camera: THREE.PerspectiveCamera;
@@ -51,6 +53,7 @@ export class CameraManager {
     );
     const newPos = mapCoords(position, false);
 
-    this.cameraGroup.position.set(newPos.x, newPos.y, newPos.z);
+    this.cameraGroup.position.lerp(newPos, 0.01 * deltatime);
+    this.camera.position.y = cameraDefaultPosion.y + Math.sin(time * 0.01) * 2;
   }
 }

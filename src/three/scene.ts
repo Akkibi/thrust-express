@@ -66,7 +66,7 @@ export class SceneManager {
     this.scene.background = new THREE.Color(0x000000);
   }
 
-  public static getInstance(canvas: HTMLDivElement | null): SceneManager {
+  public static getInstance(canvas: HTMLDivElement): SceneManager {
     if (!SceneManager.instance) {
       SceneManager.instance = new SceneManager(canvas);
     }
