@@ -110,6 +110,27 @@ export class PhysicsEngine {
     Matter.World.remove(this.engine.world, object);
   }
 
+  private rotationSmoother(deltaTime: number) {
+    // Before lerping, adjust targetRotation
+    let shortestTargetRotation = this.targetRotation;
+
+    // While the difference is greater than 180 degrees in one direction
+    while (shortestTargetRotation - this.playerRotation > 180) {
+      shortestTargetRotation -= 360;
+    }
+
+    // While the difference is greater than 180 degrees in the other direction
+    while (shortestTargetRotation - this.playerRotation < -180) {
+      shortestTargetRotation += 360;
+    }
+
+    this.playerRotation = lerp(
+      this.playerRotation,
+      shortestTargetRotation,
+      0.01 * deltaTime,
+    );
+  }
+
   public update(deltaTime: number): void {
     Matter.Engine.update(this.engine, deltaTime);
     this.visualizer.update();
@@ -120,8 +141,14 @@ export class PhysicsEngine {
     //   y: bodyVelocity.y + this.playerThrust.y,
     // });
 
-    this.playerRotation = lerp(this.playerRotation, this.targetRotation, 0.1);
-    Matter.Body.setAngle(this.player, this.targetRotation);
+    this.playerRotation = lerp(
+      this.playerRotation,
+      this.targetRotation,
+      0.01 * deltaTime,
+    );
+
+    this.rotationSmoother(deltaTime);
+    Matter.Body.setAngle(this.player, this.playerRotation);
 
     if (this.isThrusting) {
       const forceX = Math.cos(this.playerRotation);
