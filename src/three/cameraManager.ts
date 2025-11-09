@@ -1,7 +1,7 @@
 import * as THREE from "three/webgpu";
 import { mapCoords } from "../matter/physics";
 
-const cameraDefaultPosion = new THREE.Vector3(0, 4, 7);
+const cameraDefaultPosion = new THREE.Vector3(0, 8, 16);
 
 export class CameraManager {
   private static instance: CameraManager;

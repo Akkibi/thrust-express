@@ -97,7 +97,7 @@ export class SceneManager {
     if (useStore.getState().isPaused && time > 0.2) return;
 
     this.physicsEngine.targetRotation =
-      this.joystickHandler.getAngle() + Math.PI;
+      this.joystickHandler.getAngle();
 
     this.physicsEngine.update(deltatime);
 
