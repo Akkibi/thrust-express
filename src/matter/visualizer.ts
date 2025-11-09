@@ -41,7 +41,7 @@ export class Visualizer {
     this.canvas.style.left = "50%";
     this.canvas.style.border = "1px solid #888";
     this.canvas.style.display = "none";
-    this.canvas.style.transform = "scale(0.25) translate(-50%, -50%)";
+    this.canvas.style.transform = "scale(0.25) translate(-100%, -100%)";
     document.body.appendChild(this.canvas);
 
     this.render = Matter.Render.create({

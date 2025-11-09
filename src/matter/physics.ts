@@ -2,14 +2,20 @@ import Matter from "matter-js";
 import { Visualizer } from "./visualizer";
 import * as THREE from "three/webgpu";
 import { lerp } from "three/src/math/MathUtils.js";
+import { useStore } from "../store/store";
+
+const Diff_SCALE = 100;
+const FORCE_SCALE = 0.000003 * Diff_SCALE;
 
 export const mapCoords = (
   position: THREE.Vector3,
   tToM: boolean,
 ): THREE.Vector3 => {
-  const x = tToM ? (position.x + 1) * 1000 : position.x * 0.001 - 1;
-  const y = tToM ? (position.y + 1) * 1000 : position.y * 0.001 - 1;
-  const z = tToM ? (position.z + 1) * 1000 : position.z * 0.001 - 1;
+  const scale = tToM ? Diff_SCALE : 1 / Diff_SCALE;
+
+  const x = position.x * scale;
+  const y = position.y * scale;
+  const z = position.z * scale;
 
   return new THREE.Vector3(x, y, z);
 };
@@ -19,7 +25,6 @@ export interface vec2 {
   y: number;
 }
 
-const FORCE_SCALE = 0.1;
 
 export class PhysicsEngine {
   private static _instance: PhysicsEngine;
@@ -31,14 +36,15 @@ export class PhysicsEngine {
   public isThrusting: boolean = false;
 
   private constructor() {
-    this.targetRotation = 0;
-    this.playerRotation = 0;
+    this.targetRotation = Math.PI / 2;
+    this.playerRotation = Math.PI / 2;
     this.engine = Matter.Engine.create();
     this.engine.gravity.scale = 0;
     // to be removed
-    this.player = Matter.Bodies.circle(500, 500, 100, {
-      restitution: 0,
-      friction: 0.05,
+    this.player = Matter.Bodies.rectangle(500, 500, 50, 50, {
+      restitution: 0.5,
+      friction: 0,
+      frictionAir: 0,
     });
     this.restart();
     this.visualizer = Visualizer.getInstance(this.engine);
@@ -52,9 +58,16 @@ export class PhysicsEngine {
   public restart() {
     // remove all bodies
     Matter.World.clear(this.engine.world, false);
-    this.player = Matter.Bodies.circle(500, 500, 100, {
+    this.player = Matter.Bodies.rectangle(500, 500, 80, 40, {
       restitution: 0,
-      friction: 0.05,
+      frictionAir: 0,
+      friction: 0,
+    });
+    this.targetRotation = Math.PI / 2;
+
+    Matter.Body.applyForce(this.player, this.player.position, {
+      x: FORCE_SCALE,
+      y: -FORCE_SCALE,
     });
 
     Matter.World.add(this.engine.world, this.player);
@@ -77,9 +90,9 @@ export class PhysicsEngine {
     // console.log(newCoord, {x: 40, y: 40});
     const object = Matter.Bodies.rectangle(
       newCoord.x,
-      newCoord.y,
-      size.x * 100,
-      size.y * 100,
+      newCoord.z,
+      size.x * Diff_SCALE,
+      size.z * Diff_SCALE,
       { isStatic: !moving },
     );
     if (rotation) Matter.Body.rotate(object, rotation);
@@ -111,17 +124,12 @@ export class PhysicsEngine {
   }
 
   private rotationSmoother(deltaTime: number) {
-    // Before lerping, adjust targetRotation
     let shortestTargetRotation = this.targetRotation;
 
-    // While the difference is greater than 180 degrees in one direction
-    while (shortestTargetRotation - this.playerRotation > 180) {
-      shortestTargetRotation -= 360;
-    }
-
-    // While the difference is greater than 180 degrees in the other direction
-    while (shortestTargetRotation - this.playerRotation < -180) {
-      shortestTargetRotation += 360;
+    if (this.targetRotation - this.playerRotation > Math.PI) {
+      shortestTargetRotation -= Math.PI * 2;
+    } else if (this.targetRotation - this.playerRotation < -Math.PI) {
+      shortestTargetRotation += Math.PI * 2;
     }
 
     this.playerRotation = lerp(
@@ -135,22 +143,12 @@ export class PhysicsEngine {
     Matter.Engine.update(this.engine, deltaTime);
     this.visualizer.update();
 
-    // const bodyVelocity = this.player.velocity;
-    // Matter.Body.setVelocity(this.player, {
-    //   x: bodyVelocity.x + this.playerThrust.x,
-    //   y: bodyVelocity.y + this.playerThrust.y,
-    // });
-
-    this.playerRotation = lerp(
-      this.playerRotation,
-      this.targetRotation,
-      0.01 * deltaTime,
-    );
-
     this.rotationSmoother(deltaTime);
     Matter.Body.setAngle(this.player, this.playerRotation);
 
-    if (this.isThrusting) {
+    const isThrust = useStore.getState().isThrusting;
+
+    if (isThrust) {
       const forceX = Math.cos(this.playerRotation);
       const forceY = Math.sin(this.playerRotation);
 

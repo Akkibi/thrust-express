@@ -6,28 +6,28 @@ import Stats from "stats.js";
 import { PhysicsEngine } from "../matter/physics";
 import { Player } from "./player";
 import { useStore } from "../store/store";
-import { PointerHandler } from "../utils/touchHandler";
+import { JoystickHandler } from "../utils/joystickHandler";
 // import { FallingManager } from "./fallingManager";
 
 export class SceneManager {
   private static instance: SceneManager;
   public canvas: HTMLDivElement | null;
   private scene: THREE.Scene;
-
+  private joystickHandler: JoystickHandler;
   private renderer: THREE.WebGPURenderer;
   private camera: CameraManager;
   public env: Environement;
   private stats: Stats;
   private player: Player;
   private physicsEngine: PhysicsEngine;
-  public pointerHandler: PointerHandler;
 
   private constructor(canvas: HTMLDivElement) {
     // stats
     this.stats = new Stats();
     document.body.appendChild(this.stats.dom);
 
-    this.pointerHandler = PointerHandler.getInstance(canvas, {});
+    this.joystickHandler = JoystickHandler.getInstance();
+
     this.physicsEngine = PhysicsEngine.getInstance();
     this.scene = new THREE.Scene();
     this.player = Player.getInstance(
@@ -37,7 +37,6 @@ export class SceneManager {
     );
     // this.scene.background = new THREE.Color(0x111121);
     this.canvas = canvas;
-    // this.water = Water.getInstance(this.scene);
     this.renderer = new THREE.WebGPURenderer();
     this.renderer.init();
     this.renderer.shadowMap.enabled = true;
@@ -46,7 +45,7 @@ export class SceneManager {
       this.scene,
       this.physicsEngine.getPlayer(),
     );
-    this.env = Environement.getInstance(this.scene);
+    this.env = Environement.getInstance(this.scene, this.physicsEngine);
     // ambian light
     const ambientLight = new THREE.AmbientLight(0x9090c0);
     this.scene.add(ambientLight);
@@ -96,6 +95,10 @@ export class SceneManager {
     this.stats.begin();
     this.renderer.render(this.scene, this.camera.getCamera());
     if (useStore.getState().isPaused && time > 0.2) return;
+
+    this.physicsEngine.targetRotation =
+      this.joystickHandler.getAngle() + Math.PI;
+
     this.physicsEngine.update(deltatime);
 
     this.player.update(time, deltatime);
