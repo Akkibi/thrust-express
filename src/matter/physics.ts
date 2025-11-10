@@ -3,7 +3,6 @@ import { Visualizer } from "./visualizer";
 import * as THREE from "three/webgpu";
 import { lerp } from "three/src/math/MathUtils.js";
 import { useStore } from "../store/store";
-import gsap from "gsap";
 
 const Diff_SCALE = 100;
 const FORCE_SCALE = 0.000003 * Diff_SCALE;
