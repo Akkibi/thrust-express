@@ -38,11 +38,9 @@ export class PhysicsEngine {
   public targetRotation: number;
   public isThrusting: boolean = false;
   private acc : number;
-  private last : number;
 
   private constructor() {
     this.acc = 0;
-    this.last = gsap.ticker.time * 1000;
     this.targetRotation = Math.PI / 2;
     this.playerRotation = Math.PI / 2;
     this.engine = Matter.Engine.create();
