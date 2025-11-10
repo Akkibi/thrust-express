@@ -57,7 +57,7 @@ const BoostButton = (): ReactNode => {
         ref={thrustButtonRef}
       >
         <p className="text-slate-800 font-black text-center w-full absolute top-1/2 -translate-y-1/2 -tracking-widest select-none">
-          THRUST
+          BOOST
         </p>
       </div>
     </div>

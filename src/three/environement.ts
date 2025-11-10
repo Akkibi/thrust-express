@@ -42,8 +42,8 @@ export class Environement {
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({ color: 0xff0000 }),
     );
-    cube2.scale.set(1, 1, 10);
-    cube2.position.set(10, 0, 5);
+    cube2.scale.set(1, 1, 20);
+    cube2.position.set(20, 0, 5);
     this.physicsEngine.addObject(cube2.position, cube2.scale, 0, false);
     this.instanceGroup.add(cube2);
 
@@ -64,6 +64,25 @@ export class Environement {
     cube4.position.set(5, 0, 10);
     this.physicsEngine.addObject(cube4.position, cube4.scale, 0, false);
     this.instanceGroup.add(cube4);
+
+
+    const cube5 = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+    );
+    cube5.scale.set(20, 1, 1);
+    cube5.position.set(5, 0, 20);
+    this.physicsEngine.addObject(cube5.position, cube5.scale, 0, false);
+    this.instanceGroup.add(cube5);
+
+    const cube6 = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+    );
+    cube6.scale.set(20, 1, 1);
+    cube6.position.set(5, 0, -10);
+    this.physicsEngine.addObject(cube6.position, cube6.scale, 0, false);
+    this.instanceGroup.add(cube6);
 
   }
 

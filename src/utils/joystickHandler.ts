@@ -63,13 +63,13 @@ class KeyRotationManager {
 
    window.addEventListener("keydown", (e) => {
       if (e.key === "z" || e.key === "ArrowUp") {
-        this.joyStickHandler.setJoyStickAngle(Math.PI / 2);
-      } else  if (e.key === "s" || e.key === "ArrowDown") {
         this.joyStickHandler.setJoyStickAngle(- Math.PI / 2);
+      } else  if (e.key === "s" || e.key === "ArrowDown") {
+        this.joyStickHandler.setJoyStickAngle(Math.PI / 2);
       } else if (e.key === "q" || e.key === "ArrowLeft") {
-        this.joyStickHandler.setJoyStickAngle(0);
-      } else if (e.key === "d" || e.key === "ArrowRight") {
         this.joyStickHandler.setJoyStickAngle(Math.PI);
+      } else if (e.key === "d" || e.key === "ArrowRight") {
+        this.joyStickHandler.setJoyStickAngle(0);
       }
     });
   }

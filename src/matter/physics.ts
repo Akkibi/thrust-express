@@ -3,6 +3,7 @@ import { Visualizer } from "./visualizer";
 import * as THREE from "three/webgpu";
 import { lerp } from "three/src/math/MathUtils.js";
 import { useStore } from "../store/store";
+import gsap from "gsap";
 
 const Diff_SCALE = 100;
 const FORCE_SCALE = 0.000003 * Diff_SCALE;
@@ -25,6 +26,8 @@ export interface vec2 {
   y: number;
 }
 
+const FIXED_STEP_DELTA = 1 / 60;
+
 
 export class PhysicsEngine {
   private static _instance: PhysicsEngine;
@@ -34,8 +37,12 @@ export class PhysicsEngine {
   public playerRotation: number;
   public targetRotation: number;
   public isThrusting: boolean = false;
+  private acc : number;
+  private last : number;
 
   private constructor() {
+    this.acc = 0;
+    this.last = gsap.ticker.time * 1000;
     this.targetRotation = Math.PI / 2;
     this.playerRotation = Math.PI / 2;
     this.engine = Matter.Engine.create();
@@ -139,7 +146,15 @@ export class PhysicsEngine {
     );
   }
 
-  public update(deltaTime: number): void {
+  public update = (deltatime: number): void => {
+    this.acc += Math.min(deltatime, 100) ;
+      while (this.acc >= FIXED_STEP_DELTA) {
+        this.step(FIXED_STEP_DELTA);
+        this.acc -= FIXED_STEP_DELTA;
+      }
+  }
+
+  private step = (deltaTime: number): void => {
     Matter.Engine.update(this.engine, deltaTime);
     this.visualizer.update();
 
@@ -148,16 +163,18 @@ export class PhysicsEngine {
 
     const isThrust = useStore.getState().isThrusting;
 
+    const forceX = Math.cos(this.playerRotation);
+    const forceY = Math.sin(this.playerRotation);
+    Matter.Body.applyForce(this.player, this.player.position, {
+      x: forceX * FORCE_SCALE,
+      y: forceY * FORCE_SCALE,
+    });
     if (isThrust) {
-      const forceX = Math.cos(this.playerRotation);
-      const forceY = Math.sin(this.playerRotation);
 
       Matter.Body.applyForce(this.player, this.player.position, {
         x: forceX * FORCE_SCALE,
         y: forceY * FORCE_SCALE,
       });
     }
-
-    // console.log(this.isThrusting);
   }
 }
