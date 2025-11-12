@@ -1,5 +1,5 @@
 import * as THREE from "three/webgpu";
-import type { PhysicsEngine } from "../matter/physics";
+import { type PhysicsEngine } from "../matter/physics";
 // import { loadGLTFModel } from "../utils/loadGLTFModel";
 // import { PhysicsEngine } from "../matter/physics";
 
@@ -8,6 +8,8 @@ export class Environement {
   private scene: THREE.Scene;
   private physicsEngine: PhysicsEngine;
   private instanceGroup: THREE.Group;
+  private goal: THREE.Group;
+  private environementBlocks: THREE.Mesh[];
   // private physicsEngine: PhysicsEngine;
 
   private constructor(scene: THREE.Scene, physicsEngine: PhysicsEngine) {
@@ -15,75 +17,58 @@ export class Environement {
     this.physicsEngine = physicsEngine;
     this.instanceGroup = new THREE.Group();
     this.scene.add(this.instanceGroup);
-    // this.physicsEngine = PhysicsEngine.getInstance();
-    // loadGLTFModel(this.instanceGroup, "/assets/bounds/bounds.glb");
+    this.goal = new THREE.Group();
+    this.environementBlocks = [];
+  }
 
-    for (let i = 0; i < 10; i++) {
-      const cube = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 1, 1),
-        new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
-      );
-      cube.position.set(i * 2, 0, 2);
-      this.physicsEngine.addObject(cube.position, cube.scale, 0, false);
-      this.instanceGroup.add(cube);
+  public initialize(map: HTMLImageElement): void {
+    // generate map out of the map image pixels
+
+    this.environementBlocks.forEach((block) =>
+      this.instanceGroup.remove(block),
+    );
+
+    const mapCanvas = document.createElement("canvas");
+    mapCanvas.width = map.width;
+    mapCanvas.height = map.height;
+    const mapContext = mapCanvas.getContext("2d");
+    mapContext?.drawImage(map, 0, 0);
+    const mapData = mapContext?.getImageData(0, 0, map.width, map.height);
+    const mapPixels = mapData?.data;
+    if (!mapPixels) return;
+    console.log(map.width, map.height);
+    for (let i = 0; i < mapPixels.length; i += 4) {
+      const x = (i / 4) % map.width;
+      const y = Math.floor(i / 4 / map.width);
+      if (mapPixels[i + 2] > 0) {
+        const cube = new THREE.Mesh(
+          new THREE.BoxGeometry(1, 1, 1),
+          new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
+        );
+        cube.position.set(x, 0, y);
+        this.physicsEngine.addObject(cube.position, cube.scale, 0, false);
+        this.environementBlocks.push(cube);
+        this.instanceGroup.add(cube);
+      }
+      if (mapPixels[i] > 0) {
+        this.physicsEngine.setPlayer(new THREE.Vector3(x, 0, y));
+      }
+      if (mapPixels[i + 1] > 0) {
+        const cube = new THREE.Mesh(
+          new THREE.BoxGeometry(1, 1, 1),
+          new THREE.MeshBasicMaterial({ color: 0xffff00 }),
+        );
+        cube.position.set(x, 0, y);
+        this.environementBlocks.push(cube);
+        this.instanceGroup.add(cube);
+
+        this.physicsEngine.setGoal(new THREE.Vector3(x, 0, y));
+      }
     }
+  }
 
-    // create walls
-    const cube = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-    );
-    cube.scale.set(1, 1, 10);
-    cube.position.set(0, 0, 5);
-    this.physicsEngine.addObject(cube.position, cube.scale, 0, false);
-    this.instanceGroup.add(cube);
-
-    const cube2 = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-    );
-    cube2.scale.set(1, 1, 20);
-    cube2.position.set(20, 0, 5);
-    this.physicsEngine.addObject(cube2.position, cube2.scale, 0, false);
-    this.instanceGroup.add(cube2);
-
-    const cube3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-    );
-    cube3.scale.set(10, 1, 1);
-    cube3.position.set(5, 0, 0);
-    this.physicsEngine.addObject(cube3.position, cube3.scale, 0, false);
-    this.instanceGroup.add(cube3);
-
-    const cube4 = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-    );
-    cube4.scale.set(10, 1, 1);
-    cube4.position.set(5, 0, 10);
-    this.physicsEngine.addObject(cube4.position, cube4.scale, 0, false);
-    this.instanceGroup.add(cube4);
-
-
-    const cube5 = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-    );
-    cube5.scale.set(20, 1, 1);
-    cube5.position.set(5, 0, 20);
-    this.physicsEngine.addObject(cube5.position, cube5.scale, 0, false);
-    this.instanceGroup.add(cube5);
-
-    const cube6 = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 }),
-    );
-    cube6.scale.set(20, 1, 1);
-    cube6.position.set(5, 0, -10);
-    this.physicsEngine.addObject(cube6.position, cube6.scale, 0, false);
-    this.instanceGroup.add(cube6);
-
+  public getGoalPosition(): THREE.Vector3 {
+    return this.goal.position;
   }
 
   public static getInstance(

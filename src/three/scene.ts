@@ -7,9 +7,13 @@ import { PhysicsEngine } from "../matter/physics";
 import { Player } from "./player";
 import { useStore } from "../store/store";
 import { JoystickHandler } from "../utils/joystickHandler";
-// import { FallingManager } from "./fallingManager";
+import { CollisionWatcher } from "../matter/collisions";
+import { Cheats } from "../utils/cheats";
+import { eventEmitter } from "../utils/eventEmitter";
+import type { LevelType } from "../levels";
 
 export class SceneManager {
+  private cheats: Cheats;
   private static instance: SceneManager;
   public canvas: HTMLDivElement | null;
   private scene: THREE.Scene;
@@ -20,31 +24,34 @@ export class SceneManager {
   private stats: Stats;
   private player: Player;
   private physicsEngine: PhysicsEngine;
+  private collisionWatcher: CollisionWatcher;
+  private lastLevel: LevelType | null;
 
   private constructor(canvas: HTMLDivElement) {
+    this.lastLevel = null;
     // stats
     this.stats = new Stats();
+    this.cheats = Cheats.getInstance();
+    this.cheats.enable();
     document.body.appendChild(this.stats.dom);
 
     this.joystickHandler = JoystickHandler.getInstance();
 
     this.physicsEngine = PhysicsEngine.getInstance();
     this.scene = new THREE.Scene();
-    this.player = Player.getInstance(
-      this.scene,
-      this.physicsEngine.getPlayer(),
+
+    this.player = Player.getInstance(this.scene);
+    this.collisionWatcher = CollisionWatcher.getInstance(
       this.physicsEngine.engine,
     );
+
     // this.scene.background = new THREE.Color(0x111121);
     this.canvas = canvas;
     this.renderer = new THREE.WebGPURenderer();
     this.renderer.init();
     this.renderer.shadowMap.enabled = true;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.camera = CameraManager.getInstance(
-      this.scene,
-      this.physicsEngine.getPlayer(),
-    );
+    this.camera = CameraManager.getInstance(this.scene);
     this.env = Environement.getInstance(this.scene, this.physicsEngine);
     // ambian light
     const ambientLight = new THREE.AmbientLight(0x9090c0);
@@ -62,7 +69,9 @@ export class SceneManager {
 
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.scene.environment = null;
-    this.scene.background = new THREE.Color(0x000000);
+    this.scene.background = new THREE.Color(0x16161d);
+
+    eventEmitter.on("start-level", this.restart.bind(this));
   }
 
   public static getInstance(canvas: HTMLDivElement): SceneManager {
@@ -86,9 +95,25 @@ export class SceneManager {
     canvas.appendChild(this.renderer.domElement);
   }
 
-  public restart = () => {
-    useStore.setState({ isGameOver: false });
+  public restart = (level?: LevelType) => {
+    const currentLevel = level ?? this.lastLevel;
+    if (!currentLevel) return;
+    if (!currentLevel.loadedMap) return;
+    this.lastLevel = currentLevel;
+    useStore.setState({
+      isEndTitle: false,
+      isMenuOpen: false,
+      isPaused: false,
+      health: 100,
+    });
     this.physicsEngine.restart();
+    this.env.initialize(currentLevel.loadedMap);
+    const player = this.physicsEngine.getPlayer();
+    const goal = this.physicsEngine.getGoal();
+    if (!player || !goal) return;
+    this.collisionWatcher.initialize(player, goal);
+    this.player.initialize(player);
+    this.camera.initialize(player);
   };
 
   private animate(time: number, deltatime: number) {
@@ -96,8 +121,7 @@ export class SceneManager {
     this.renderer.render(this.scene, this.camera.getCamera());
     if (useStore.getState().isPaused && time > 0.2) return;
 
-    this.physicsEngine.targetRotation =
-      this.joystickHandler.getAngle();
+    this.physicsEngine.targetRotation = this.joystickHandler.getAngle();
 
     this.physicsEngine.update(deltatime);
 

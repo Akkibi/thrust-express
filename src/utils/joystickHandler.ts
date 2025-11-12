@@ -46,7 +46,6 @@ export class JoystickHandler {
   };
 }
 
-
 class KeyRotationManager {
   private static instance: KeyRotationManager;
   private joyStickHandler: JoystickHandler;
@@ -61,10 +60,10 @@ class KeyRotationManager {
   private constructor() {
     this.joyStickHandler = JoystickHandler.getInstance();
 
-   window.addEventListener("keydown", (e) => {
+    window.addEventListener("keydown", (e) => {
       if (e.key === "z" || e.key === "ArrowUp") {
-        this.joyStickHandler.setJoyStickAngle(- Math.PI / 2);
-      } else  if (e.key === "s" || e.key === "ArrowDown") {
+        this.joyStickHandler.setJoyStickAngle(-Math.PI / 2);
+      } else if (e.key === "s" || e.key === "ArrowDown") {
         this.joyStickHandler.setJoyStickAngle(Math.PI / 2);
       } else if (e.key === "q" || e.key === "ArrowLeft") {
         this.joyStickHandler.setJoyStickAngle(Math.PI);
@@ -74,6 +73,5 @@ class KeyRotationManager {
     });
   }
 }
-
 
 KeyRotationManager.getInstance();

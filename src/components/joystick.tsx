@@ -72,12 +72,12 @@ const JoyStick = (): ReactNode => {
   return (
     <div className="absolute inset-0" ref={joystickContainerRef}>
       <div
-        className="absolute w-40 h-40 -translate-x-1/2 -translate-y-1/2 bg-slate-900 rounded-full border-4 border-slate-800 select-none pointer-events-none"
+        className="absolute w-40 h-40 -translate-x-1/2 -translate-y-1/2 bg-stone-900 rounded-full border-4 border-stone-800 select-none pointer-events-none"
         ref={joystickRef}
         style={{ opacity: isTouchActive ? 0.25 : 0.05 }}
       >
         <div
-          className="absolute w-20 h-20 -translate-x-1/2 -translate-y-1/2 bg-slate-500 rounded-full border-4 border-slate-400"
+          className="absolute w-20 h-20 -translate-x-1/2 -translate-y-1/2 bg-stone-500 rounded-full border-4 border-stone-400"
           ref={joyStickKnobRef}
         ></div>
       </div>

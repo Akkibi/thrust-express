@@ -8,7 +8,7 @@ const Interactions = (): ReactNode => {
       <JoyStick />
       <BoostButton />
       <div
-        className="absolute top-0 right-0 w-10 h-10 bg-slate-900 text-slate-600 rounded-bl-2xl"
+        className="absolute top-0 right-0 w-10 h-10 bg-stone-900 text-stone-600 rounded-bl-2xl"
         onClick={() => {
           // request fullscreen
           if (document.fullscreenElement) {

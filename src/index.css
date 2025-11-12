@@ -40,21 +40,20 @@ h1 {
   line-height: 1.1;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+
+.custom-inner-shadow {
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
-button:hover {
-  border-color: #646cff;
+
+.custom-text-border {
+    text-shadow: 2px 2px 0 black, -2px -2px 0 black, -2px 2px 0 black, 2px -2px 0 black;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+
+
+.custom-light-border {
+    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.25), 5px 5px 10px rgba(0, 0,0, 0.5);
+}
+
+.custom-light-border-inset {
+    box-shadow: 1px 1px 0px rgba(255, 255, 255, 0.25),inset 5px 5px 10px rgba(0, 0,0, 0.5);
 }

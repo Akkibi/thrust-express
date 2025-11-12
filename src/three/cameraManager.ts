@@ -1,16 +1,16 @@
 import * as THREE from "three/webgpu";
 import { mapCoords } from "../matter/physics";
 
-const cameraDefaultPosion = new THREE.Vector3(0, 8, 16);
+const cameraDefaultPosion = new THREE.Vector3(0, 10, 14);
 
 export class CameraManager {
   private static instance: CameraManager;
   private camera: THREE.PerspectiveCamera;
   private cameraGroup: THREE.Group;
-  private player: Matter.Body;
+  private player: Matter.Body | null;
 
-  private constructor(scene: THREE.Scene, player: Matter.Body) {
-    this.player = player;
+  private constructor(scene: THREE.Scene) {
+    this.player = null;
     this.camera = new THREE.PerspectiveCamera(
       40,
       window.innerWidth / window.innerHeight,
@@ -30,12 +30,9 @@ export class CameraManager {
     });
   }
 
-  public static getInstance(
-    scene: THREE.Scene,
-    player: Matter.Body,
-  ): CameraManager {
+  public static getInstance(scene: THREE.Scene): CameraManager {
     if (!CameraManager.instance) {
-      CameraManager.instance = new CameraManager(scene, player);
+      CameraManager.instance = new CameraManager(scene);
     }
     return CameraManager.instance;
   }
@@ -44,15 +41,23 @@ export class CameraManager {
     return this.camera;
   }
 
+  public initialize(player: Matter.Body): void {
+    this.player = player;
+  }
+
   public update(time: number, deltatime: number): void {
+    if (!this.player) return;
+
     const position = new THREE.Vector3(
       this.player.position.x,
       0,
       this.player.position.y,
     );
+    if (deltatime > 200) {
+      console.log(deltatime);
+    }
     const newPos = mapCoords(position, false);
-
-    this.cameraGroup.position.lerp(newPos, 0.01 * deltatime);
+    this.cameraGroup.position.copy(newPos);
     this.camera.position.y = cameraDefaultPosion.y + Math.sin(time * 0.1) * 0.1;
   }
 }

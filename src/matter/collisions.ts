@@ -1,57 +1,87 @@
 import Matter, { Engine, Body } from "matter-js";
+import { eventEmitter } from "../utils/eventEmitter";
+import { useStore } from "../store/store";
+import levels from "../levels";
+
+const triggerEndScreen = () => {
+  console.log("ResetGame");
+  eventEmitter.trigger("goalReached", [
+    useStore.getState().health,
+    useStore.getState().score,
+  ]);
+  useStore.setState({ isPaused: true, isEndTitle: true });
+  if (useStore.getState().health <= 0) return;
+  levels[0].isDone = true;
+};
 
 export class CollisionWatcher {
   private static instance: CollisionWatcher;
-  private character: Body;
-  private currentCollisions: Set<Body>; // Use a Set for efficient add/remove and uniqueness
+  private player: Body | null;
+  private currentCollisions: Set<Body>;
+  private goal: Body | null;
 
-  private constructor(character: Body, engine: Engine) {
-    this.character = character;
+  private constructor(engine: Engine) {
+    this.player = null;
+    this.goal = null;
     this.currentCollisions = new Set();
 
-    Matter.Events.on(engine, "collisionStart", (event) => {
-      event.pairs.forEach((pair) => {
-        const { bodyA, bodyB } = pair;
-        if (bodyA === this.character) {
-          this.currentCollisions.add(bodyB);
-        } else if (bodyB === this.character) {
-          this.currentCollisions.add(bodyA);
-        }
-      });
-    });
-
-    Matter.Events.on(engine, "collisionEnd", (event) => {
-      event.pairs.forEach((pair) => {
-        const { bodyA, bodyB } = pair;
-        if (bodyA === this.character) {
-          this.currentCollisions.delete(bodyB);
-        } else if (bodyB === this.character) {
-          this.currentCollisions.delete(bodyA);
-        }
-      });
-    });
-
-    // You might also use 'collisionActive' if you need to know what's *currently* touching
-    // But for jump detection, collisionStart/End is often sufficient to know if you're grounded.
+    Matter.Events.on(engine, "collisionStart", this.collisionStart.bind(this));
+    Matter.Events.on(engine, "collisionEnd", this.collisionEnd.bind(this));
   }
 
-  static getInstance(character: Body, engine: Engine): CollisionWatcher {
+  private collisionStart(event: Matter.IEventCollision<Matter.Engine>) {
+    if (!this.player || !this.goal) return;
+    event.pairs.forEach((pair) => {
+      const { bodyA, bodyB } = pair;
+      // console.log(bodyA, bodyB);
+
+      const isGoal = bodyA === this.goal || bodyB === this.goal;
+      const isPlayer = bodyA === this.player || bodyB === this.player;
+
+      if (isPlayer && !isGoal) {
+        console.log("Collision to wall");
+        useStore.setState({ health: useStore.getState().health - 20 });
+        if (useStore.getState().health <= 0) {
+          triggerEndScreen();
+        }
+      }
+
+      if (isGoal && isPlayer) {
+        triggerEndScreen();
+      } else if (bodyA === this.player) {
+        this.currentCollisions.add(bodyB);
+      } else if (bodyB === this.player) {
+        this.currentCollisions.add(bodyA);
+      }
+    });
+  }
+
+  private collisionEnd(event: Matter.IEventCollision<Matter.Engine>) {
+    if (!this.player) return;
+    event.pairs.forEach((pair) => {
+      const { bodyA, bodyB } = pair;
+      if (bodyA === this.player) {
+        this.currentCollisions.delete(bodyB);
+      } else if (bodyB === this.player) {
+        this.currentCollisions.delete(bodyA);
+      }
+    });
+  }
+
+  public initialize(player: Body, goal: Body): void {
+    console.log("initialize", player, goal);
+    this.player = player;
+    this.goal = goal;
+  }
+
+  static getInstance(engine: Engine): CollisionWatcher {
     if (!CollisionWatcher.instance) {
-      CollisionWatcher.instance = new CollisionWatcher(character, engine);
+      CollisionWatcher.instance = new CollisionWatcher(engine);
     }
     return CollisionWatcher.instance;
   }
-
-  // With this event-driven approach, you don't need addBodies or updateCollisions
-  // as all bodies in the engine are automatically considered for collisions.
 
   public getCollisions(): Body[] {
     return Array.from(this.currentCollisions);
   }
 }
-
-// Usage:
-// const collisionWatcher = CollisionWatcher.getInstance(playerBody, engine);
-// if (collisionWatcher.getCollisions().length > 0) {
-//   // Character is touching something, can jump
-// }

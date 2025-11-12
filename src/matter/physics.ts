@@ -27,16 +27,16 @@ export interface vec2 {
 
 const FIXED_STEP_DELTA = 1 / 60;
 
-
 export class PhysicsEngine {
   private static _instance: PhysicsEngine;
   public engine: Matter.Engine;
-  private player: Matter.Body;
+  private player: Matter.Body | null;
+  private goal: Matter.Body | null;
   private visualizer: Visualizer;
   public playerRotation: number;
   public targetRotation: number;
   public isThrusting: boolean = false;
-  private acc : number;
+  private acc: number;
 
   private constructor() {
     this.acc = 0;
@@ -45,11 +45,8 @@ export class PhysicsEngine {
     this.engine = Matter.Engine.create();
     this.engine.gravity.scale = 0;
     // to be removed
-    this.player = Matter.Bodies.rectangle(500, 500, 50, 50, {
-      restitution: 0.5,
-      friction: 0,
-      frictionAir: 0,
-    });
+    this.player = null;
+    this.goal = null;
     this.restart();
     this.visualizer = Visualizer.getInstance(this.engine);
   }
@@ -59,29 +56,43 @@ export class PhysicsEngine {
     return this._instance;
   }
 
+  public setPlayer = (position: THREE.Vector3) => {
+    const newposition = mapCoords(position, true);
+
+    this.player = Matter.Bodies.rectangle(
+      newposition.x,
+      newposition.z,
+      80,
+      40,
+      {
+        restitution: 0,
+        frictionAir: 0,
+        friction: 0,
+        label: "player",
+      },
+    );
+    this.targetRotation = Math.PI / 2;
+
+    Matter.World.add(this.engine.world, this.player);
+  };
+
+  public setGoal = (position: THREE.Vector3) => {
+    const newposition = mapCoords(position, true);
+    this.goal = Matter.Bodies.rectangle(newposition.x, newposition.z, 80, 80, {
+      isStatic: true,
+      label: "goal",
+    });
+
+    Matter.World.add(this.engine.world, this.goal);
+  };
+
   public restart() {
     // remove all bodies
     Matter.World.clear(this.engine.world, false);
-    this.player = Matter.Bodies.rectangle(500, 500, 80, 40, {
-      restitution: 0,
-      frictionAir: 0,
-      friction: 0,
-    });
-    this.targetRotation = Math.PI / 2;
-
-    Matter.Body.applyForce(this.player, this.player.position, {
-      x: FORCE_SCALE,
-      y: -FORCE_SCALE,
-    });
-
-    Matter.World.add(this.engine.world, this.player);
-
-    this.player.inertia = Infinity;
-
-    Matter.World.add(this.engine.world, this.player);
   }
 
-  public getPlayer = (): Matter.Body => this.player;
+  public getPlayer = (): Matter.Body | null => this.player;
+  public getGoal = (): Matter.Body | null => this.goal;
 
   public addObject(
     position: THREE.Vector3,
@@ -144,34 +155,30 @@ export class PhysicsEngine {
   }
 
   public update = (deltatime: number): void => {
-    this.acc += Math.min(deltatime, 100) ;
-      while (this.acc >= FIXED_STEP_DELTA) {
-        this.step(FIXED_STEP_DELTA);
-        this.acc -= FIXED_STEP_DELTA;
-      }
-  }
+    this.visualizer.update();
+    this.acc += Math.min(deltatime, 100);
+    while (this.acc >= FIXED_STEP_DELTA) {
+      this.step(FIXED_STEP_DELTA);
+      this.acc -= FIXED_STEP_DELTA;
+    }
+  };
 
   private step = (deltaTime: number): void => {
-    Matter.Engine.update(this.engine, deltaTime);
-    this.visualizer.update();
+    if (!this.player) return;
 
     this.rotationSmoother(deltaTime);
     Matter.Body.setAngle(this.player, this.playerRotation);
 
     const isThrust = useStore.getState().isThrusting;
 
-    const forceX = Math.cos(this.playerRotation);
-    const forceY = Math.sin(this.playerRotation);
+    const forceX = Math.cos(this.targetRotation);
+    const forceY = Math.sin(this.targetRotation);
+    const multiplyer = isThrust ? 3 : 1;
     Matter.Body.applyForce(this.player, this.player.position, {
-      x: forceX * FORCE_SCALE,
-      y: forceY * FORCE_SCALE,
+      x: forceX * FORCE_SCALE * multiplyer,
+      y: forceY * FORCE_SCALE * multiplyer,
     });
-    if (isThrust) {
 
-      Matter.Body.applyForce(this.player, this.player.position, {
-        x: forceX * FORCE_SCALE,
-        y: forceY * FORCE_SCALE,
-      });
-    }
-  }
+    Matter.Engine.update(this.engine, deltaTime);
+  };
 }
