@@ -67,6 +67,7 @@ export class Player {
 
     this.instanceGroup.rotation.set(0, rotation, 0);
     this.instanceGroup.position.set(newPos.x, newPos.y, newPos.z);
+    console.log(this.instanceGroup.position);
 
     if (deltatime < 0) {
       console.log(time, deltatime);

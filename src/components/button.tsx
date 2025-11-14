@@ -12,7 +12,7 @@ const Button = ({
   return (
     <button
       className={cn(
-        "w-fit px-10 rounded-full bg-stone-950 h-10 flex justify-center items-center custom-light-border relative hover:scale-105 active:scale-90 transition-transform duration-300 ease-out",
+        "w-fit px-10 rounded-full bg-slate-950 h-10 flex justify-center items-center custom-light-border relative hover:scale-105 active:scale-90 transition-transform duration-300 ease-out",
         isDisabled ? "opacity-50" : "opacity-100",
       )}
       type="button"
@@ -20,7 +20,7 @@ const Button = ({
       disabled={isDisabled}
     >
       <div className="absolute inset-0.75 bg-yellow-700 rounded-full">
-        <div className="absolute inset-1 bg-stone-950 rounded-full"></div>
+        <div className="absolute inset-1 bg-slate-950 rounded-full"></div>
       </div>
       <span className="relative font-black">{children}</span>
     </button>

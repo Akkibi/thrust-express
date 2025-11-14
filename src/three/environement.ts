@@ -1,5 +1,7 @@
 import * as THREE from "three/webgpu";
 import { type PhysicsEngine } from "../matter/physics";
+import type { MapDataType } from "../types/types";
+import { InstanceObjectManager } from "./instancesManager";
 // import { loadGLTFModel } from "../utils/loadGLTFModel";
 // import { PhysicsEngine } from "../matter/physics";
 
@@ -10,61 +12,68 @@ export class Environement {
   private instanceGroup: THREE.Group;
   private goal: THREE.Group;
   private environementBlocks: THREE.Mesh[];
+  private mapData: MapDataType | null;
+  private objectManager: InstanceObjectManager;
   // private physicsEngine: PhysicsEngine;
 
   private constructor(scene: THREE.Scene, physicsEngine: PhysicsEngine) {
     this.scene = scene;
+    this.mapData = null;
+    this.objectManager = InstanceObjectManager.getInstance();
     this.physicsEngine = physicsEngine;
     this.instanceGroup = new THREE.Group();
     this.scene.add(this.instanceGroup);
     this.goal = new THREE.Group();
     this.environementBlocks = [];
+    this.scene.add(this.objectManager.getMesh());
   }
 
-  public initialize(map: HTMLImageElement): void {
+  public async loadConfig(mapData: string) {
+    const response = await fetch(mapData);
+    if (!response.ok) throw new Error("Failed to load JSON");
+    this.mapData = await response.json();
+  }
+
+  public initialize(): void {
+    this.objectManager.releaseAll();
     // generate map out of the map image pixels
 
     this.environementBlocks.forEach((block) =>
       this.instanceGroup.remove(block),
     );
 
-    const mapCanvas = document.createElement("canvas");
-    mapCanvas.width = map.width;
-    mapCanvas.height = map.height;
-    const mapContext = mapCanvas.getContext("2d");
-    mapContext?.drawImage(map, 0, 0);
-    const mapData = mapContext?.getImageData(0, 0, map.width, map.height);
-    const mapPixels = mapData?.data;
-    if (!mapPixels) return;
-    console.log(map.width, map.height);
-    for (let i = 0; i < mapPixels.length; i += 4) {
-      const x = (i / 4) % map.width;
-      const y = Math.floor(i / 4 / map.width);
-      if (mapPixels[i + 2] > 0) {
-        const cube = new THREE.Mesh(
-          new THREE.BoxGeometry(1, 1, 1),
-          new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
+    if (!this.mapData) return;
+    console.log("walls", this.mapData.optimizedWalls.length);
+    this.mapData.optimizedWalls.forEach((wall) => {
+      const cubeIndex = this.objectManager.get();
+      if (cubeIndex) {
+        const position = new THREE.Vector3(
+          wall.position.x,
+          -2,
+          wall.position.y,
         );
-        cube.position.set(x, 0, y);
-        this.physicsEngine.addObject(cube.position, cube.scale, 0, false);
-        this.environementBlocks.push(cube);
-        this.instanceGroup.add(cube);
+        const scale = new THREE.Vector3(wall.scale?.x, 4, wall.scale?.y);
+        this.objectManager.updatePosition(cubeIndex, position);
+        this.objectManager.updateScale(cubeIndex, scale);
+        this.physicsEngine.addObject(position, scale, 0, false);
       }
-      if (mapPixels[i] > 0) {
-        this.physicsEngine.setPlayer(new THREE.Vector3(x, 0, y));
-      }
-      if (mapPixels[i + 1] > 0) {
-        const cube = new THREE.Mesh(
-          new THREE.BoxGeometry(1, 1, 1),
-          new THREE.MeshBasicMaterial({ color: 0xffff00 }),
-        );
-        cube.position.set(x, 0, y);
-        this.environementBlocks.push(cube);
-        this.instanceGroup.add(cube);
+    });
+    // generate goal
+    const goalPosition = this.mapData.goal.position;
+    const cube = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0xffff00 }),
+    );
+    cube.position.set(goalPosition.x, 0, goalPosition.y);
+    this.environementBlocks.push(cube);
+    this.instanceGroup.add(cube);
+    this.physicsEngine.setGoal(cube.position);
 
-        this.physicsEngine.setGoal(new THREE.Vector3(x, 0, y));
-      }
-    }
+    // generatePlayer
+    const playerPosition = this.mapData.player.position;
+    this.physicsEngine.setPlayer(
+      new THREE.Vector3(playerPosition.x, 0, playerPosition.y),
+    );
   }
 
   public getGoalPosition(): THREE.Vector3 {

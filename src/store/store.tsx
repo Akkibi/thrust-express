@@ -12,6 +12,7 @@ type Store = {
   setHealth: (health: number) => void;
   score: number;
   globalScore: number;
+  levelsDone: string[];
 };
 
 export const useStore = create<Store>((set) => ({
@@ -26,4 +27,5 @@ export const useStore = create<Store>((set) => ({
   setHealth: (health: number) => set({ health }),
   score: 0,
   globalScore: 0,
+  levelsDone: [],
 }));

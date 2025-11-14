@@ -5,7 +5,7 @@ import { lerp } from "three/src/math/MathUtils.js";
 import { useStore } from "../store/store";
 
 const Diff_SCALE = 100;
-const FORCE_SCALE = 0.000003 * Diff_SCALE;
+const FORCE_SCALE = 0.000004 * Diff_SCALE;
 
 export const mapCoords = (
   position: THREE.Vector3,

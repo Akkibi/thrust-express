@@ -1,7 +1,7 @@
 import Matter, { Engine, Body } from "matter-js";
 import { eventEmitter } from "../utils/eventEmitter";
 import { useStore } from "../store/store";
-import levels from "../levels";
+import { lastLevel } from "../levels";
 
 const triggerEndScreen = () => {
   console.log("ResetGame");
@@ -10,8 +10,9 @@ const triggerEndScreen = () => {
     useStore.getState().score,
   ]);
   useStore.setState({ isPaused: true, isEndTitle: true });
-  if (useStore.getState().health <= 0) return;
-  levels[0].isDone = true;
+  const last = lastLevel.level;
+  if (useStore.getState().health <= 0 || last == null) return;
+  useStore.getState().levelsDone.push(last.name);
 };
 
 export class CollisionWatcher {

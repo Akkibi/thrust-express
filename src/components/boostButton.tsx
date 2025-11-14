@@ -48,8 +48,8 @@ const BoostButton = (): ReactNode => {
   }, [thrustButtonRef, setIsThrusting]);
 
   return (
-    <div className="absolute bottom-0 right-0 w-30 h-30 bg-stone-700 rounded-tl-4xl custom-light-border">
-      <div className="absolute bottom-0 right-0 w-28 h-28 bg-stone-900 rounded-tl-3xl custom-inner-shadow">
+    <div className="absolute bottom-0 right-0 w-30 h-30 bg-slate-700 rounded-tl-4xl custom-light-border">
+      <div className="absolute bottom-0 right-0 w-28 h-28 bg-slate-900 rounded-tl-3xl custom-inner-shadow">
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-red-700 rounded-full border-4 border-black custom-light-border"
           style={{

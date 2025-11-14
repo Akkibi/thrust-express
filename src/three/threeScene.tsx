@@ -1,7 +1,8 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { SceneManager } from "./scene.ts";
-import Interactions from "../components/interactions.tsx";
+import JoyStick from "../components/joystick.tsx";
+import BoostButton from "../components/boostButton.tsx";
 
 const ThreeManager = (): ReactNode => {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -17,7 +18,8 @@ const ThreeManager = (): ReactNode => {
   return (
     <>
       <div ref={canvasRef} id="threeContainer"></div>
-      <Interactions />
+      <JoyStick />
+      <BoostButton />
     </>
   );
 };

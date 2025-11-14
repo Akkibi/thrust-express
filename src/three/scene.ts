@@ -10,7 +10,7 @@ import { JoystickHandler } from "../utils/joystickHandler";
 import { CollisionWatcher } from "../matter/collisions";
 import { Cheats } from "../utils/cheats";
 import { eventEmitter } from "../utils/eventEmitter";
-import type { LevelType } from "../levels";
+import { lastLevel, type LevelType } from "../levels";
 
 export class SceneManager {
   private cheats: Cheats;
@@ -25,10 +25,8 @@ export class SceneManager {
   private player: Player;
   private physicsEngine: PhysicsEngine;
   private collisionWatcher: CollisionWatcher;
-  private lastLevel: LevelType | null;
 
   private constructor(canvas: HTMLDivElement) {
-    this.lastLevel = null;
     // stats
     this.stats = new Stats();
     this.cheats = Cheats.getInstance();
@@ -96,10 +94,9 @@ export class SceneManager {
   }
 
   public restart = (level?: LevelType) => {
-    const currentLevel = level ?? this.lastLevel;
-    if (!currentLevel) return;
-    if (!currentLevel.loadedMap) return;
-    this.lastLevel = currentLevel;
+    const currentLevel = level ?? lastLevel.level;
+    if (!currentLevel || !currentLevel.map) return;
+    lastLevel.level = currentLevel;
     useStore.setState({
       isEndTitle: false,
       isMenuOpen: false,
@@ -107,19 +104,21 @@ export class SceneManager {
       health: 100,
     });
     this.physicsEngine.restart();
-    this.env.initialize(currentLevel.loadedMap);
-    const player = this.physicsEngine.getPlayer();
-    const goal = this.physicsEngine.getGoal();
-    if (!player || !goal) return;
-    this.collisionWatcher.initialize(player, goal);
-    this.player.initialize(player);
-    this.camera.initialize(player);
+    this.env.loadConfig(currentLevel.map).then(() => {
+      this.env.initialize();
+      const player = this.physicsEngine.getPlayer();
+      const goal = this.physicsEngine.getGoal();
+      if (!player || !goal) return;
+      this.collisionWatcher.initialize(player, goal);
+      this.player.initialize(player);
+      this.camera.initialize(player);
+    });
   };
 
   private animate(time: number, deltatime: number) {
     this.stats.begin();
+    if (useStore.getState().isPaused) return;
     this.renderer.render(this.scene, this.camera.getCamera());
-    if (useStore.getState().isPaused && time > 0.2) return;
 
     this.physicsEngine.targetRotation = this.joystickHandler.getAngle();
 
