@@ -12,15 +12,25 @@ const UiElements = () => {
 
   return (
     <>
+      <div
+        className="absolute inset-0 bg-yellow-600 select-none pointer-events-none"
+        style={{
+          mask: "url(/health-bounds.png) luminance",
+          maskSize: "100% 100%",
+          opacity: 1 - playerHealth / 100,
+        }}
+      ></div>
       <div className="absolute top-5 left-5 h-5 w-14 bg-[url(/logo.png)] bg-cover bg-center bg-no-repeat"></div>
-      <div className="h-[50vh] rounded-l-lg w-5 bg-slate-900 right-0 absolute top-1/2 -translate-y-1/2">
-        <div className="absolute inset-1 bg-red-200 rounded-full overflow-clip">
+      <div className="w-[75vw]  md:w-[50vw] rounded-b-lg h-5 bg-slate-900 top-0 absolute left-1/2 -translate-x-1/2">
+        <div className="absolute inset-1 bg-yellow-950 rounded-full overflow-clip">
           <div
-            className="absolute inset-0 bg-red-600 origin-bottom"
+            className="absolute inset-0 bg-yellow-500"
             style={{
-              transform: `scaleY(${playerHealth / 100})`,
+              width: `${playerHealth}%`,
             }}
-          ></div>
+          >
+            <div className="bg-[url(/strikes.png)] absolute inset-0 opacity-20"></div>
+          </div>
         </div>
       </div>
       <GameMenu isOpen={isMenuOpen} setIsOpen={setMenuOpen} />

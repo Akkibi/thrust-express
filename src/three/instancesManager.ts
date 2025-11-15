@@ -1,6 +1,6 @@
 import * as THREE from "three/webgpu";
 import { uv, attribute } from "three/tsl"; // Import attribute
-import { texture } from "three/src/nodes/TSL.js";
+import { float, mix, positionLocal, texture } from "three/src/nodes/TSL.js";
 
 export class InstanceObjectManager {
   private static _instance: InstanceObjectManager;
@@ -36,15 +36,26 @@ export class InstanceObjectManager {
       "vec2",
     );
 
-    // Use the instanceTextureScaleAttribute in your UV calculation
-    const scaledUV = uv().mul(instanceTextureScaleAttribute); // Use the attribute here!
+    // Your existing nodes
+    const scaledUV = uv().mul(instanceTextureScaleAttribute);
     const mapNode = texture(loadedTexture, scaledUV);
 
-    // Create a TSL-based StandardMaterial
-    const material = new THREE.MeshStandardNodeMaterial({
-      color: 0xffffff,
-    });
-    material.colorNode = mapNode;
+    // Define gradient colors
+    const bottomColor = float(0x000000); // black at the bottom
+    // const topColor = float(0xffffff); // white at the top
+
+    // Gradient factor from UV
+    const t = positionLocal.y.mul(0.25).add(1); // 0 at bottom, 1 at top
+
+    // Create vertical gradient
+    const gradient = mix(bottomColor, mapNode, t);
+
+    // Combine texture color with gradient
+    // const finalColor = mapNode.mul(gradient);
+
+    // Material
+    const material = new THREE.MeshBasicNodeMaterial();
+    material.colorNode = gradient;
 
     this.mesh = new THREE.InstancedMesh(geometry, material, this.maxCount);
     this.mesh.instanceMatrix.needsUpdate = true;
@@ -117,7 +128,7 @@ export class InstanceObjectManager {
     this.dummy.scale.set(scale.x, scale.y, scale.z);
 
     const textureScaleX = scale.x * 0.25;
-    const textureScaleY = scale.y * 0.25;
+    const textureScaleY = scale.z * 0.25;
 
     this.setInstanceTextureScale(
       index,

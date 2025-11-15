@@ -3,7 +3,7 @@ export interface LevelType {
   isDone: boolean;
   image: string;
   map: string | null;
-  score: number;
+  best: { score: number; time: number };
 }
 
 export const lastLevel: { level: LevelType | null } = {
@@ -13,38 +13,38 @@ export const lastLevel: { level: LevelType | null } = {
 const levels: LevelType[] = [
   {
     name: "Tutorial",
-    isDone: false,
     image: "level1.png",
     map: "/mapData/map1.json",
-    score: 0,
+    isDone: false,
+    best: { score: 0, time: 0 },
   },
   {
     name: "Level 1",
-    isDone: false,
     image: "level2.png",
     map: "/mapData/map2.json",
-    score: 0,
+    isDone: false,
+    best: { score: 0, time: 0 },
   },
   {
     name: "Level 2",
-    isDone: false,
     image: "level3.png",
     map: "/mapData/map3.json",
-    score: 0,
+    isDone: false,
+    best: { score: 0, time: 0 },
   },
   {
     name: "Level 3",
-    isDone: false,
     image: "level3.png",
     map: "/mapData/map4.json",
-    score: 0,
+    isDone: false,
+    best: { score: 0, time: 0 },
   },
   {
     name: "Level 4",
-    isDone: false,
     image: "level3.png",
     map: null,
-    score: 0,
+    isDone: false,
+    best: { score: 0, time: 0 },
   },
 ];
 

@@ -7,12 +7,16 @@ const triggerEndScreen = () => {
   console.log("ResetGame");
   eventEmitter.trigger("goalReached", [
     useStore.getState().health,
-    useStore.getState().score,
+    useStore.getState().currentTimePassed,
   ]);
   useStore.setState({ isPaused: true, isEndTitle: true });
   const last = lastLevel.level;
   if (useStore.getState().health <= 0 || last == null) return;
-  useStore.getState().levelsDone.push(last.name);
+  useStore.getState().levelsDone.push({
+    levelName: last.name,
+    time: useStore.getState().currentTimePassed,
+    score: useStore.getState().score,
+  });
 };
 
 export class CollisionWatcher {

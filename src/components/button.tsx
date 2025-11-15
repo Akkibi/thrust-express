@@ -12,7 +12,7 @@ const Button = ({
   return (
     <button
       className={cn(
-        "w-fit px-10 rounded-full bg-slate-950 h-10 flex justify-center items-center custom-light-border relative hover:scale-105 active:scale-90 transition-transform duration-300 ease-out",
+        "cursor-pointer w-fit px-6 md:px-10 rounded-full bg-slate-950 h-10 flex justify-center items-center custom-light-border relative hover:scale-105 active:scale-90 transition-transform duration-300 ease-out",
         isDisabled ? "opacity-50" : "opacity-100",
       )}
       type="button"

@@ -1,7 +1,7 @@
 import * as THREE from "three/webgpu";
 import { mapCoords } from "../matter/physics";
 
-const cameraDefaultPosion = new THREE.Vector3(0, 10, 14);
+const cameraDefaultPosion = new THREE.Vector3(0, 14, 14);
 
 export class CameraManager {
   private static instance: CameraManager;
@@ -45,7 +45,7 @@ export class CameraManager {
     this.player = player;
   }
 
-  public update(time: number, deltatime: number): void {
+  public update(deltatime: number): void {
     if (!this.player) return;
 
     const position = new THREE.Vector3(
@@ -58,6 +58,10 @@ export class CameraManager {
     }
     const newPos = mapCoords(position, false);
     this.cameraGroup.position.copy(newPos);
-    this.camera.position.y = cameraDefaultPosion.y + Math.sin(time * 0.1) * 0.1;
+    // this.camera.position.y = cameraDefaultPosion.y + Math.sin(time * 0.1) * 0.1;
+    const targetCameraPosition = cameraDefaultPosion
+      .clone()
+      .multiplyScalar(1 + this.player.speed * 0.02);
+    this.camera.position.lerp(targetCameraPosition, 0.1);
   }
 }

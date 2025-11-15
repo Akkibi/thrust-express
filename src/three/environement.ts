@@ -49,10 +49,10 @@ export class Environement {
       if (cubeIndex) {
         const position = new THREE.Vector3(
           wall.position.x,
-          -2,
+          -2.5,
           wall.position.y,
         );
-        const scale = new THREE.Vector3(wall.scale?.x, 4, wall.scale?.y);
+        const scale = new THREE.Vector3(wall.scale?.x, 6, wall.scale?.y);
         this.objectManager.updatePosition(cubeIndex, position);
         this.objectManager.updateScale(cubeIndex, scale);
         this.physicsEngine.addObject(position, scale, 0, false);

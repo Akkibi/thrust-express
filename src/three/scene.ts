@@ -10,7 +10,7 @@ import { JoystickHandler } from "../utils/joystickHandler";
 import { CollisionWatcher } from "../matter/collisions";
 import { Cheats } from "../utils/cheats";
 import { eventEmitter } from "../utils/eventEmitter";
-import { lastLevel, type LevelType } from "../levels";
+import levels, { lastLevel, type LevelType } from "../levels";
 
 export class SceneManager {
   private cheats: Cheats;
@@ -43,7 +43,6 @@ export class SceneManager {
       this.physicsEngine.engine,
     );
 
-    // this.scene.background = new THREE.Color(0x111121);
     this.canvas = canvas;
     this.renderer = new THREE.WebGPURenderer();
     this.renderer.init();
@@ -67,11 +66,19 @@ export class SceneManager {
 
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.scene.environment = null;
-    this.scene.background = new THREE.Color(0x16161d);
+    // this.scene.background = new THREE.Color(0x16161d);
+    this.scene.background = new THREE.Color(0x000000);
 
     eventEmitter.on("start-level", this.restart.bind(this));
+    eventEmitter.on("next-level", this.nextLevel.bind(this));
   }
 
+  private nextLevel() {
+    const currentLevel = lastLevel.level;
+    if (!currentLevel) return;
+    const currentLevelIndex = levels.indexOf(currentLevel);
+    this.restart(levels[currentLevelIndex + 1]);
+  }
   public static getInstance(canvas: HTMLDivElement): SceneManager {
     if (!SceneManager.instance) {
       SceneManager.instance = new SceneManager(canvas);
@@ -102,6 +109,7 @@ export class SceneManager {
       isMenuOpen: false,
       isPaused: false,
       health: 100,
+      currentTimePassed: 0,
     });
     this.physicsEngine.restart();
     this.env.loadConfig(currentLevel.map).then(() => {
@@ -125,8 +133,10 @@ export class SceneManager {
     this.physicsEngine.update(deltatime);
 
     this.player.update(time, deltatime);
-    this.camera.update(time, deltatime);
+    this.camera.update(deltatime);
 
+    const timePassed = useStore.getState().currentTimePassed;
+    useStore.setState({ currentTimePassed: timePassed + deltatime });
     this.stats.end();
   }
 

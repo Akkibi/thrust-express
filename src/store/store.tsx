@@ -1,5 +1,11 @@
 import { create } from "zustand";
 
+interface levelScore {
+  levelName: string;
+  time: number;
+  score: number;
+}
+
 type Store = {
   isEndTitle: boolean;
   setIsEndTitle: (isEndTitle: boolean) => void;
@@ -12,7 +18,8 @@ type Store = {
   setHealth: (health: number) => void;
   score: number;
   globalScore: number;
-  levelsDone: string[];
+  levelsDone: levelScore[];
+  currentTimePassed: number;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -28,4 +35,5 @@ export const useStore = create<Store>((set) => ({
   score: 0,
   globalScore: 0,
   levelsDone: [],
+  currentTimePassed: 0,
 }));
