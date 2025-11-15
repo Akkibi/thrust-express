@@ -104,15 +104,16 @@ export class SceneManager {
     const currentLevel = level ?? lastLevel.level;
     if (!currentLevel || !currentLevel.map) return;
     lastLevel.level = currentLevel;
-    useStore.setState({
-      isEndTitle: false,
-      isMenuOpen: false,
-      isPaused: false,
-      health: 100,
-      currentTimePassed: 0,
-    });
     this.physicsEngine.restart();
+    eventEmitter.trigger("loading", [true]);
     this.env.loadConfig(currentLevel.map).then(() => {
+      useStore.setState({
+        isEndTitle: false,
+        isMenuOpen: false,
+        isPaused: false,
+        health: 100,
+        currentTimePassed: 0,
+      });
       this.env.initialize();
       const player = this.physicsEngine.getPlayer();
       const goal = this.physicsEngine.getGoal();
@@ -120,6 +121,7 @@ export class SceneManager {
       this.collisionWatcher.initialize(player, goal);
       this.player.initialize(player);
       this.camera.initialize(player);
+      eventEmitter.trigger("loading", [false]);
     });
   };
 
