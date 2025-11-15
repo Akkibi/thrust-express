@@ -36,7 +36,7 @@ const levels: LevelType[] = [
     name: "Level 3",
     isDone: false,
     image: "level3.png",
-    map: null,
+    map: "/mapData/map4.json",
     score: 0,
   },
   {

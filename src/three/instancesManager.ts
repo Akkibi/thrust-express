@@ -1,4 +1,6 @@
 import * as THREE from "three/webgpu";
+import { uv, attribute } from "three/tsl"; // Import attribute
+import { texture } from "three/src/nodes/TSL.js";
 
 export class InstanceObjectManager {
   private static _instance: InstanceObjectManager;
@@ -10,36 +12,90 @@ export class InstanceObjectManager {
   }
 
   public mesh: THREE.InstancedMesh;
-
   private readonly maxCount = 500;
   private freeIndices: number[] = [];
   private inUse: Set<number> = new Set();
-
   private dummy = new THREE.Object3D();
+
+  // To store per-instance colors and texture scales
+  private instanceColors: Float32Array;
+  private instanceTextureScales: Float32Array;
 
   private constructor() {
     const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load("models/textures/walls.jpg");
+    const loadedTexture = textureLoader.load("models/textures/walls.jpg");
+    loadedTexture.wrapS = THREE.RepeatWrapping;
+    loadedTexture.wrapT = THREE.RepeatWrapping;
+    loadedTexture.colorSpace = THREE.SRGBColorSpace;
 
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({ map: texture });
+
+    // Define the instanceTextureScale attribute
+    const instanceTextureScaleAttribute = attribute(
+      "instanceTextureScale",
+      "vec2",
+    );
+
+    // Use the instanceTextureScaleAttribute in your UV calculation
+    const scaledUV = uv().mul(instanceTextureScaleAttribute); // Use the attribute here!
+    const mapNode = texture(loadedTexture, scaledUV);
+
+    // Create a TSL-based StandardMaterial
+    const material = new THREE.MeshStandardNodeMaterial({
+      color: 0xffffff,
+    });
+    material.colorNode = mapNode;
 
     this.mesh = new THREE.InstancedMesh(geometry, material, this.maxCount);
+    this.mesh.instanceMatrix.needsUpdate = true;
     this.mesh.frustumCulled = false;
 
-    // Initialize all instances as invisible / identity transforms
+    // Create instanceColor attribute
+    this.instanceColors = new Float32Array(this.maxCount * 3);
+    this.mesh.instanceColor = new THREE.InstancedBufferAttribute(
+      this.instanceColors,
+      3,
+    );
+
+    // Create instanceTextureScale attribute
+    this.instanceTextureScales = new Float32Array(this.maxCount * 2); // x and y for scale
+    this.mesh.geometry.setAttribute(
+      "instanceTextureScale",
+      new THREE.InstancedBufferAttribute(this.instanceTextureScales, 2),
+    );
+
     for (let i = 0; i < this.maxCount; i++) {
       this.freeIndices.push(i);
       this.dummy.position.set(0, 0, 0);
       this.dummy.rotation.set(0, 0, 0);
+      this.dummy.scale.set(1, 1, 1);
       this.dummy.updateMatrix();
       this.mesh.setMatrixAt(i, this.dummy.matrix);
+
+      // Default color white
+      this.setInstanceColor(i, new THREE.Color(1, 1, 1));
+      // Default texture scale
+      this.setInstanceTextureScale(i, new THREE.Vector2(1, 1));
     }
 
     this.mesh.instanceMatrix.needsUpdate = true;
+    this.mesh.instanceColor.needsUpdate = true;
+    this.mesh.geometry.attributes.instanceTextureScale.needsUpdate = true;
   }
 
-  /** Acquire an instance index (returns null if exhausted). */
+  private setInstanceColor(index: number, color: THREE.Color) {
+    this.instanceColors[index * 3] = color.r;
+    this.instanceColors[index * 3 + 1] = color.g;
+    this.instanceColors[index * 3 + 2] = color.b;
+    this.mesh.instanceColor!.needsUpdate = true;
+  }
+
+  private setInstanceTextureScale(index: number, scale: THREE.Vector2) {
+    this.instanceTextureScales[index * 2] = scale.x;
+    this.instanceTextureScales[index * 2 + 1] = scale.y;
+    this.mesh.geometry.attributes.instanceTextureScale.needsUpdate = true;
+  }
+
   public get(): number | null {
     if (this.freeIndices.length === 0) return null;
     const index = this.freeIndices.pop() as number;
@@ -47,16 +103,35 @@ export class InstanceObjectManager {
     return index;
   }
 
-  /** Update the transform of a specific instance. */
   public updatePosition = (index: number, position: THREE.Vector3): void => {
     if (!this.inUse.has(index)) return;
+
     this.dummy.position.copy(position);
+
     this.updateMatrix(index);
   };
 
   public updateScale = (index: number, scale: THREE.Vector3) => {
     if (!this.inUse.has(index)) return;
-    this.dummy.scale.copy(scale);
+
+    this.dummy.scale.set(scale.x, scale.y, scale.z);
+
+    const textureScaleX = scale.x * 0.25;
+    const textureScaleY = scale.y * 0.25;
+
+    this.setInstanceTextureScale(
+      index,
+      new THREE.Vector2(textureScaleX, textureScaleY),
+    );
+
+    // 50/50 random color overlay using TSL logic
+    const randomColor = new THREE.Color(
+      Math.random(),
+      Math.random(),
+      Math.random(),
+    );
+    this.setInstanceColor(index, randomColor);
+
     this.updateMatrix(index);
   };
 
@@ -72,18 +147,19 @@ export class InstanceObjectManager {
     this.mesh.instanceMatrix.needsUpdate = true;
   };
 
-  /** Return an instance to the pool. */
   public release(index: number): void {
     if (!this.inUse.has(index)) return;
 
     this.inUse.delete(index);
     this.freeIndices.push(index);
 
-    // Reset transform
     this.dummy.position.set(0, 0, 0);
     this.dummy.rotation.set(0, 0, 0);
+    this.dummy.scale.set(1, 1, 1);
     this.dummy.updateMatrix();
     this.mesh.setMatrixAt(index, this.dummy.matrix);
+    this.setInstanceColor(index, new THREE.Color(1, 1, 1)); // reset color
+    this.setInstanceTextureScale(index, new THREE.Vector2(1, 1)); // reset texture scale
     this.mesh.instanceMatrix.needsUpdate = true;
   }
 
@@ -94,7 +170,6 @@ export class InstanceObjectManager {
     }
   }
 
-  /** Add the InstancedMesh to your scene. */
   public getMesh(): THREE.InstancedMesh {
     return this.mesh;
   }
