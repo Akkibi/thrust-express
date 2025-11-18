@@ -9,7 +9,14 @@ const Interactions = (): ReactNode => {
           document.exitFullscreen();
           return;
         }
-        document.documentElement.requestFullscreen();
+        const el: HTMLElement | any = document.documentElement;
+        if (el.requestFullscreen) {
+          el.requestFullscreen();
+        } else if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        } else if (el.mozRequestFullscreen) {
+          el.mozRequestFullscreen();
+        }
       }}
     >
       <svg
