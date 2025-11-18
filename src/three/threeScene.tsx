@@ -25,8 +25,8 @@ const ThreeManager = (): ReactNode => {
       <div className="absolute bottom-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover -rotate-90"></div>
       <JoyStick />
       <BoostButton />
-      <div className="absolute top-2 right-3 text-white font-black custom-text-border">
-        {Math.round(timePassed / 1000)}s
+      <div className="absolute top-2 right-3 text-white font-black custom-text-border font-mono z-10">
+        {(timePassed / 1000).toFixed(2)}s
       </div>
     </>
   );

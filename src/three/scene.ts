@@ -31,7 +31,10 @@ export class SceneManager {
     this.stats = new Stats();
     this.cheats = Cheats.getInstance();
     this.cheats.enable();
-    document.body.appendChild(this.stats.dom);
+    // document.body.appendChild(this.stats.dom);
+    document.getElementById("threeContainer")?.appendChild(this.stats.dom);
+    this.stats.dom.style.position = "absolute";
+    this.stats.dom.style.zIndex = "1";
 
     this.joystickHandler = JoystickHandler.getInstance();
 
@@ -69,7 +72,7 @@ export class SceneManager {
     // this.scene.background = new THREE.Color(0x16161d);
     this.scene.background = new THREE.Color(0x000000);
 
-    eventEmitter.on("start-level", this.restart.bind(this));
+    eventEmitter.on("start", this.restart.bind(this));
     eventEmitter.on("next-level", this.nextLevel.bind(this));
   }
 
@@ -101,12 +104,26 @@ export class SceneManager {
   }
 
   public restart = (level?: LevelType) => {
-    const currentLevel = level ?? lastLevel.level;
-    if (!currentLevel || !currentLevel.map) return;
-    lastLevel.level = currentLevel;
+    const currentLevel = level;
     this.physicsEngine.restart();
     eventEmitter.trigger("loading", [true]);
-    this.env.loadConfig(currentLevel.map).then(() => {
+    if (!currentLevel || !currentLevel.map) {
+      this.loadEndless();
+    } else {
+      lastLevel.level = currentLevel;
+      this.loadLevel(currentLevel);
+    }
+  };
+
+  private loadEndless = () => {
+    this.env.unloadLevels();
+    this.env.loadEndless();
+  };
+
+  private loadLevel = (level: LevelType) => {
+    if (!level.map) return;
+    this.env.unloadEndless();
+    this.env.loadConfig(level.map).then(() => {
       useStore.setState({
         isEndTitle: false,
         isMenuOpen: false,
@@ -114,7 +131,7 @@ export class SceneManager {
         health: 100,
         currentTimePassed: 0,
       });
-      this.env.initialize();
+      this.env.loadLevel(level);
       const player = this.physicsEngine.getPlayer();
       const goal = this.physicsEngine.getGoal();
       if (!player || !goal) return;

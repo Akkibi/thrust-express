@@ -1,13 +1,18 @@
 import { useStore } from "../store/store";
 import EndTitle from "./endTitle";
 import GameMenu from "./gameMenu";
+import LevelSelector from "./levelSelector";
 import LoadingScreen from "./loadingScreen";
 
 const UiElements = () => {
-  const isEndTitle = useStore((state) => state.isEndTitle);
-  const setEndTitle = useStore((state) => state.setIsEndTitle);
+  const isEndTitleOpen = useStore((state) => state.isEndTitle);
+  const setEndTitleOpen = useStore((state) => state.setIsEndTitle);
   const isMenuOpen = useStore((state) => state.isMenuOpen);
-  const setMenuOpen = useStore((state) => state.setIsMenuOpen);
+  const setIsMenuOpen = useStore((state) => state.setIsMenuOpen);
+  const isLevelSelectorOpen = useStore((state) => state.isLevelSelectorOpen);
+  const setLevelSelectorOpen = useStore(
+    (state) => state.setIsLevelSelectorOpen,
+  );
   const playerHealth = useStore((state) => state.health);
 
   return (
@@ -33,11 +38,20 @@ const UiElements = () => {
           </div>
         </div>
       </div>
-      <GameMenu isOpen={isMenuOpen} setIsOpen={setMenuOpen} />
+      <LevelSelector
+        isOpen={isLevelSelectorOpen}
+        setIsOpen={setLevelSelectorOpen}
+        setIsMenuOpen={setIsMenuOpen}
+      />
       <EndTitle
-        isOpen={isEndTitle}
-        setIsOpen={setEndTitle}
-        setMenuOpen={setMenuOpen}
+        isOpen={isEndTitleOpen}
+        setIsOpen={setEndTitleOpen}
+        setLevelSelectorOpen={setLevelSelectorOpen}
+      />
+      <GameMenu
+        isOpen={isMenuOpen}
+        setIsOpen={setEndTitleOpen}
+        setLevelSelectorOpen={setLevelSelectorOpen}
       />
       <LoadingScreen />
     </>

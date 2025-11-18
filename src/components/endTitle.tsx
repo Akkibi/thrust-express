@@ -6,10 +6,14 @@ import Button from "./button";
 interface EndTitleTypes {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  setMenuOpen: (isOpen: boolean) => void;
+  setLevelSelectorOpen: (isOpen: boolean) => void;
 }
 
-const EndTitle = ({ isOpen, setIsOpen, setMenuOpen }: EndTitleTypes) => {
+const EndTitle = ({
+  isOpen,
+  setIsOpen,
+  setLevelSelectorOpen,
+}: EndTitleTypes) => {
   const playerHealth = useStore((state) => state.health);
   const currentTime = useStore((state) => state.currentTimePassed);
   if (!isOpen) return <></>;
@@ -29,7 +33,7 @@ const EndTitle = ({ isOpen, setIsOpen, setMenuOpen }: EndTitleTypes) => {
                 <p>
                   <span className="text-xs">Time : </span>
                   <span className="text-yellow-500 font-black custom-text-border">
-                    {Math.round(currentTime / 1000)}s
+                    {(currentTime / 1000).toFixed(2)}s
                   </span>
                 </p>
                 <p>
@@ -51,7 +55,7 @@ const EndTitle = ({ isOpen, setIsOpen, setMenuOpen }: EndTitleTypes) => {
           <div className="flex flex-row gap-4 mb-5 relative">
             <Button
               onClick={() => {
-                setMenuOpen(true);
+                setLevelSelectorOpen(true);
                 setIsOpen(false);
               }}
               isDisabled={false}
@@ -76,7 +80,7 @@ const EndTitle = ({ isOpen, setIsOpen, setMenuOpen }: EndTitleTypes) => {
             className="relative p-5 cursor-pointer custom-text-border hover:scale-105 active:scale-90 transition-transform duration-300 ease-out active:text-yellow-600"
             type="button"
             onClick={() => {
-              eventEmitter.trigger("start-level", []);
+              eventEmitter.trigger("start-level", [lastLevel.level]);
               setIsOpen(false);
             }}
           >

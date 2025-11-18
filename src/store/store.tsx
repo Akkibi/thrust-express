@@ -20,6 +20,8 @@ type Store = {
   globalScore: number;
   levelsDone: levelScore[];
   currentTimePassed: number;
+  isLevelSelectorOpen: boolean;
+  setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) => void;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -30,6 +32,9 @@ export const useStore = create<Store>((set) => ({
   setIsEndTitle: (isEndTitle: boolean) => set({ isEndTitle }),
   isMenuOpen: true,
   setIsMenuOpen: (isMenuOpen: boolean) => set({ isMenuOpen }),
+  isLevelSelectorOpen: false,
+  setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) =>
+    set({ isLevelSelectorOpen }),
   health: 100,
   setHealth: (health: number) => set({ health }),
   score: 0,

@@ -1,32 +1,51 @@
-import levels from "../levels";
+import { eventEmitter } from "../utils/eventEmitter";
+import Button from "./button";
 import Interactions from "./interactions";
-import LevelItem from "./levelItem";
 
 interface GameMenuTypes {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  setLevelSelectorOpen: (isOpen: boolean) => void;
 }
 
-const GameMenu = ({ isOpen, setIsOpen }: GameMenuTypes) => {
+const GameMenu = ({
+  isOpen,
+  setIsOpen,
+  setLevelSelectorOpen,
+}: GameMenuTypes) => {
   if (!isOpen) return <></>;
+
   return (
-    <div
-      className={`absolute z-50 inset-0 bg-slate-800 flex flex-col items-center justify-center p-3`}
-    >
+    <div className="absolute inset-0 bg-linear-to-b from-slate-700 to-slate-950 flex flex-col justify-center items-center gap-10 z-40">
+      <video
+        className="absolute w-full h-full object-cover inset-0 z-0"
+        autoPlay
+        loop
+        muted
+        playsInline
+        src="/video-menu.webm"
+      ></video>
+      <div className="bg-[url(/logo.png)] bg-contain bg-center bg-no-repeat w-full max-w-96 aspect-video relative"></div>
+      <div className="h-full"></div>
+      <div className="flex flex-row gap-5 pb-[10vh] justify-center items-center">
+        <Button
+          onClick={() => {
+            setLevelSelectorOpen(true);
+            setIsOpen(false);
+          }}
+        >
+          Select level
+        </Button>
+        <Button
+          onClick={() => {
+            eventEmitter.trigger("start");
+            setIsOpen(false);
+          }}
+        >
+          Endless mode
+        </Button>
+      </div>
       <Interactions />
-      <div className="w-full px-5 py-2 mb-3 bg-slate-950 rounded-3xl custom-light-border-inset flex flex-row relative">
-        <p className="w-full text-xl font-black custom-text-border">LEVELS</p>
-        <div className="bg-[url(/logo.png)] bg-contain bg-center bg-no-repeat h-10 w-30 absolute right-0 top-1/2 -translate-y-1/2"></div>
-      </div>
-      <div className="flex flex-col gap-2 w-full h-full p-3 bg-slate-950 rounded-3xl overflow-y-scroll custom-light-border-inset">
-        {levels.map((level, index) => (
-          <LevelItem
-            level={level}
-            action={() => setIsOpen(false)}
-            key={index}
-          />
-        ))}
-      </div>
     </div>
   );
 };

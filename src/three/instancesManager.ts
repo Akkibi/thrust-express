@@ -136,14 +136,20 @@ export class InstanceObjectManager {
     );
 
     // 50/50 random color overlay using TSL logic
-    const randomColor = new THREE.Color(
-      Math.random(),
-      Math.random(),
-      Math.random(),
-    );
-    this.setInstanceColor(index, randomColor);
+    // const randomColor = new THREE.Color(
+    //   Math.random(),
+    //   Math.random(),
+    //   Math.random(),
+    // );
+    // this.setInstanceColor(index, randomColor);
 
     this.updateMatrix(index);
+  };
+
+  public updateColor = (index: number, color: THREE.Color) => {
+    if (!this.inUse.has(index)) return;
+    this.setInstanceColor(index, color);
+    // this.updateMatrix(index);
   };
 
   public updateRotation = (index: number, rotation: THREE.Euler) => {

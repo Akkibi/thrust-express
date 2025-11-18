@@ -2,6 +2,7 @@ import * as THREE from "three/webgpu";
 import { type PhysicsEngine } from "../matter/physics";
 import type { MapDataType } from "../types/types";
 import { InstanceObjectManager } from "./instancesManager";
+import type { LevelType } from "../levels";
 // import { loadGLTFModel } from "../utils/loadGLTFModel";
 // import { PhysicsEngine } from "../matter/physics";
 
@@ -13,20 +14,37 @@ export class Environement {
   private goal: THREE.Group;
   private environementBlocks: THREE.Mesh[];
   private mapData: MapDataType | null;
-  private objectManager: InstanceObjectManager;
+  private objectManager: InstanceObjectManager | null;
+  private terrainManager: InstanceObjectManager | null;
   // private physicsEngine: PhysicsEngine;
 
   private constructor(scene: THREE.Scene, physicsEngine: PhysicsEngine) {
     this.scene = scene;
     this.mapData = null;
-    this.objectManager = InstanceObjectManager.getInstance();
+    this.objectManager = null;
+    this.terrainManager = null;
     this.physicsEngine = physicsEngine;
     this.instanceGroup = new THREE.Group();
     this.scene.add(this.instanceGroup);
     this.goal = new THREE.Group();
     this.environementBlocks = [];
-    this.scene.add(this.objectManager.getMesh());
   }
+
+  public unloadLevels = () => {
+    const objectManager = this.objectManager;
+    if (!objectManager) return;
+    objectManager.releaseAll();
+    this.scene.remove(objectManager.getMesh());
+    this.objectManager = null;
+  };
+
+  public unloadEndless = () => {
+    const terrainManager = this.terrainManager;
+    if (!terrainManager) return;
+    terrainManager.releaseAll();
+    this.scene.remove(terrainManager.getMesh());
+    this.terrainManager = null;
+  };
 
   public async loadConfig(mapData: string) {
     const response = await fetch(mapData);
@@ -34,8 +52,14 @@ export class Environement {
     this.mapData = await response.json();
   }
 
-  public initialize(): void {
-    this.objectManager.releaseAll();
+  public loadLevel(level: LevelType): void {
+    if (this.objectManager == null) {
+      this.objectManager = InstanceObjectManager.getInstance();
+      this.scene.add(this.objectManager.getMesh());
+    }
+    const objectManager = this.objectManager;
+    if (!objectManager) return;
+    objectManager.releaseAll();
     // generate map out of the map image pixels
 
     this.environementBlocks.forEach((block) =>
@@ -45,7 +69,7 @@ export class Environement {
     if (!this.mapData) return;
     console.log("walls", this.mapData.optimizedWalls.length);
     this.mapData.optimizedWalls.forEach((wall) => {
-      const cubeIndex = this.objectManager.get();
+      const cubeIndex = objectManager.get();
       if (cubeIndex) {
         const position = new THREE.Vector3(
           wall.position.x,
@@ -53,8 +77,10 @@ export class Environement {
           wall.position.y,
         );
         const scale = new THREE.Vector3(wall.scale?.x, 6, wall.scale?.y);
-        this.objectManager.updatePosition(cubeIndex, position);
-        this.objectManager.updateScale(cubeIndex, scale);
+        objectManager.updatePosition(cubeIndex, position);
+        objectManager.updateScale(cubeIndex, scale);
+        const color = new THREE.Color(...level.color);
+        objectManager.updateColor(cubeIndex, color);
         this.physicsEngine.addObject(position, scale, 0, false);
       }
     });
@@ -75,6 +101,10 @@ export class Environement {
       new THREE.Vector3(playerPosition.x, 0, playerPosition.y),
     );
   }
+
+  public loadEndless = () => {
+    console.log("loadEndless");
+  };
 
   public getGoalPosition(): THREE.Vector3 {
     return this.goal.position;

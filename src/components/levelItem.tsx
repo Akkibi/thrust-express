@@ -23,12 +23,15 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
 
     if (scores.length <= 0) return;
     const best = scores.reduce((acc, current) => {
-      if (acc.time < current.time) {
-        return current;
+      if (acc.time >= current.time) {
+        if (acc.score > current.score) {
+          return current;
+        }
       }
       return acc;
     });
 
+    console.log(best);
     setBestPenality(100 - best.score);
     setBestTime(best.time);
   }, [levelsDone, level]);
@@ -51,7 +54,7 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
               <>
                 Best :
                 <p className="text-sm opacity-50 font-bold">
-                  Time : {Math.round(bestTime / 1000)}s
+                  Time : {(bestTime / 1000).toFixed(2)}s
                   <br />
                   Penality : {bestPenality}
                 </p>
@@ -65,15 +68,16 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
           {levelsDone.find(
             (currentLevel) => currentLevel.levelName === level.name,
           ) ? (
-            <div className="absolute inset-1 bg-green-600 rounded-full"></div>
+            <div className="absolute inset-1 bg-green-500 rounded-full custom-inner-shadow"></div>
           ) : (
-            <div className="absolute inset-1 bg-red-900 rounded-full"></div>
+            <div className="absolute inset-1 bg-red-950 rounded-full custom-inner-shadow"></div>
           )}
         </div>
         <div className="w-full"></div>
         <Button
+          size="sm"
           onClick={() => {
-            eventEmitter.trigger("start-level", [level]);
+            eventEmitter.trigger("start", [level]);
             action();
           }}
           isDisabled={!level.map}
