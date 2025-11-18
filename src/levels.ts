@@ -14,7 +14,7 @@ export const lastLevel: { level: LevelType | null } = {
 const levels: LevelType[] = [
   {
     name: "Tutorial",
-    image: "level1.png",
+    image: "map1.png",
     map: "/mapData/map1.json",
     isDone: false,
     best: { score: 0, time: 0 },
@@ -22,7 +22,7 @@ const levels: LevelType[] = [
   },
   {
     name: "Level 1",
-    image: "level2.png",
+    image: "map2.png",
     map: "/mapData/map2.json",
     isDone: false,
     best: { score: 0, time: 0 },
@@ -30,7 +30,7 @@ const levels: LevelType[] = [
   },
   {
     name: "Level 2",
-    image: "level3.png",
+    image: "map3.png",
     map: "/mapData/map2bis.json",
     isDone: false,
     best: { score: 0, time: 0 },
@@ -38,7 +38,7 @@ const levels: LevelType[] = [
   },
   {
     name: "Level 3",
-    image: "level3.png",
+    image: "map3.png",
     map: "/mapData/map3.json",
     isDone: false,
     best: { score: 0, time: 0 },
@@ -46,7 +46,7 @@ const levels: LevelType[] = [
   },
   {
     name: "Level 4",
-    image: "level3.png",
+    image: "map4.png",
     map: "/mapData/map4.json",
     isDone: false,
     best: { score: 0, time: 0 },

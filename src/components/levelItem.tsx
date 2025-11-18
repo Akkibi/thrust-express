@@ -45,13 +45,14 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
       >
         <div
           className={cn(
-            "absolute inset-0 z-0 opacity-50 bg-center bg-no-repeat bg-contain",
+            "absolute inset-0 scale-95 z-0 opacity-50 bg-center bg-no-repeat bg-contain mix-blend-plus-lighter",
           )}
           style={{
             backgroundImage: `url(/mapImages/${level.image})`,
+            imageRendering: "pixelated",
           }}
         ></div>
-        {/*<div className="absolute inset-0 z-0 bg-[url(https://st5.depositphotos.com/35515900/63359/i/450/depositphotos_633598666-stock-photo-led-screen-texture-dots-background.jpg)] bg-cover opacity-50 bg-center bg-no-repeat"></div>*/}
+        <div className="absolute inset-0 z-0 bg-[url(https://st5.depositphotos.com/35515900/63359/i/450/depositphotos_633598666-stock-photo-led-screen-texture-dots-background.jpg)] bg-cover opacity-50 bg-center bg-no-repeat mix-blend-multiply"></div>
         <div className="flex flex-row justify-between h-full w-full p-5 z-10 relative">
           <p className=" text-xl font-black custom-text-border">{level.name}</p>
           <div className="self-center flex flex-col">
