@@ -52,6 +52,7 @@ const GameMenu = ({
           Select level
         </Button>
         <Button
+          isDisabled
           onClick={() => {
             eventEmitter.trigger("start");
             setIsOpen(false);
