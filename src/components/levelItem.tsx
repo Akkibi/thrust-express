@@ -41,10 +41,17 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
       <div
         className={cn(
           "min-h-fit bg-slate-800 pb-5 mb-5 relative rounded-lg rounded-b-2xl custom-inner-shadow overflow-clip",
-          `bg-[url(${level.map})] bg-center bg-no-repeat bg-cover`,
         )}
       >
-        <div className="absolute inset-0 z-0 bg-[url(/postal-icon.svg)] bg-cover opacity-5 bg-center bg-no-repeat"></div>
+        <div
+          className={cn(
+            "absolute inset-0 z-0 opacity-50 bg-center bg-no-repeat bg-contain",
+          )}
+          style={{
+            backgroundImage: `url(/mapImages/${level.image})`,
+          }}
+        ></div>
+        {/*<div className="absolute inset-0 z-0 bg-[url(https://st5.depositphotos.com/35515900/63359/i/450/depositphotos_633598666-stock-photo-led-screen-texture-dots-background.jpg)] bg-cover opacity-50 bg-center bg-no-repeat"></div>*/}
         <div className="flex flex-row justify-between h-full w-full p-5 z-10 relative">
           <p className=" text-xl font-black custom-text-border">{level.name}</p>
           <div className="self-center flex flex-col">
