@@ -80,7 +80,7 @@ const EndTitle = ({
             className="relative p-5 cursor-pointer custom-text-border hover:scale-105 active:scale-90 transition-transform duration-300 ease-out active:text-yellow-600"
             type="button"
             onClick={() => {
-              eventEmitter.trigger("start-level", [lastLevel.level]);
+              eventEmitter.trigger("start", [lastLevel.level]);
               setIsOpen(false);
             }}
           >
