@@ -22,6 +22,7 @@ type Store = {
   currentTimePassed: number;
   isLevelSelectorOpen: boolean;
   setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) => void;
+  thrustSpeed: number;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -41,4 +42,5 @@ export const useStore = create<Store>((set) => ({
   globalScore: 0,
   levelsDone: [],
   currentTimePassed: 0,
+  thrustSpeed: 0,
 }));

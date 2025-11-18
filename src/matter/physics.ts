@@ -179,6 +179,8 @@ export class PhysicsEngine {
       y: forceY * FORCE_SCALE * multiplyer,
     });
 
+    useStore.setState({ thrustSpeed: this.player.speed });
+
     Matter.Engine.update(this.engine, deltaTime);
   };
 }

@@ -6,6 +6,7 @@ const BoostButton = (): ReactNode => {
 
   const setIsThrusting = useStore((s) => s.setIsThrusting);
   const isThrusting = useStore((s) => s.isThrusting);
+  const thrustSpeed = useStore((s) => s.thrustSpeed);
 
   useEffect(() => {
     const thrustButton = thrustButtonRef.current;
@@ -48,10 +49,10 @@ const BoostButton = (): ReactNode => {
   }, [thrustButtonRef, setIsThrusting]);
 
   return (
-    <div className="absolute bottom-0 right-0 w-30 h-30 bg-slate-700 rounded-tl-4xl custom-light-border">
-      <div className="absolute bottom-0 right-0 w-28 h-28 bg-slate-900 rounded-tl-3xl custom-inner-shadow">
+    <div className="absolute bottom-0 right-0 w-30 h-40 bg-slate-700 rounded-tl-4xl custom-light-border">
+      <div className="absolute bottom-0 right-0 w-28 h-38 bg-slate-900 rounded-tl-3xl custom-inner-shadow">
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-red-700 rounded-full border-4 border-black custom-light-border"
+          className="absolute left-1/2 top-3 -translate-x-1/2 w-20 h-20 bg-red-700 rounded-full border-4 border-black custom-light-border"
           style={{
             opacity: isThrusting ? 0.5 : 1,
           }}
@@ -60,6 +61,12 @@ const BoostButton = (): ReactNode => {
           <p className="text-white font-black text-center w-full absolute top-1/2 -translate-y-1/2 -tracking-widest select-none">
             BOOST
           </p>
+        </div>
+        <div className="absolute bottom-0 left-2 right-2 h-10 bg-slate-950 rounded-t-md overflow-hidden">
+          <div
+            className="absolute inset-0 origin-bottom bg-yellow-400"
+            style={{ transform: `scaleY(${thrustSpeed * 0.1})` }}
+          ></div>
         </div>
       </div>
     </div>

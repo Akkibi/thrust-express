@@ -40,7 +40,7 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
     <div className=" w-full p-2 bg-slate-600 flex flex-none flex-col relative rounded-xl overflow-clip custom-light-border">
       <div
         className={cn(
-          "min-h-fit bg-slate-800 pb-5 mb-5 relative rounded-lg rounded-b-2xl custom-inner-shadow overflow-clip",
+          "min-h-fit h-40 bg-slate-800 pb-5 mb-5 relative rounded-lg rounded-b-2xl custom-inner-shadow overflow-clip",
         )}
       >
         <div
