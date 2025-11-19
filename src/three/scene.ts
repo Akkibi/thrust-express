@@ -5,7 +5,7 @@ import { Environement } from "./environement";
 import Stats from "stats.js";
 import { PhysicsEngine } from "../matter/physics";
 import { Player } from "./player";
-import { useStore } from "../store/store";
+import { globals, useStore } from "../store/store";
 import { JoystickHandler } from "../utils/joystickHandler";
 import { CollisionWatcher } from "../matter/collisions";
 import { Cheats } from "../utils/cheats";
@@ -129,8 +129,8 @@ export class SceneManager {
         isMenuOpen: false,
         isPaused: false,
         health: 100,
-        currentTimePassed: 0,
       });
+      globals.currentTime = 0;
       this.env.loadLevel(level);
       const player = this.physicsEngine.getPlayer();
       const goal = this.physicsEngine.getGoal();
@@ -154,8 +154,7 @@ export class SceneManager {
     this.player.update(time, deltatime);
     this.camera.update(deltatime);
 
-    const timePassed = useStore.getState().currentTimePassed;
-    useStore.setState({ currentTimePassed: timePassed + deltatime });
+    globals.currentTime += deltatime;
     this.stats.end();
   }
 

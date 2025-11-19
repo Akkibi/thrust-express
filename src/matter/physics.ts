@@ -2,7 +2,7 @@ import Matter from "matter-js";
 import { Visualizer } from "./visualizer";
 import * as THREE from "three/webgpu";
 import { lerp } from "three/src/math/MathUtils.js";
-import { useStore } from "../store/store";
+import { globals, useStore } from "../store/store";
 
 const Diff_SCALE = 100;
 const FORCE_SCALE = 0.000004 * Diff_SCALE;
@@ -179,8 +179,7 @@ export class PhysicsEngine {
       y: forceY * FORCE_SCALE * multiplyer,
     });
 
-    useStore.setState({ thrustSpeed: this.player.speed });
-
+    globals.thrustSpeed = this.player.speed;
     Matter.Engine.update(this.engine, deltaTime);
   };
 }

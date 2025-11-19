@@ -1,5 +1,9 @@
 import levels from "../levels";
-import { useStore, type LevelScoreType } from "../store/store";
+import {
+  localStorageStore,
+  useStore,
+  type LevelScoreType,
+} from "../store/store";
 import { eventEmitter } from "../utils/eventEmitter";
 import Button from "./button";
 import { findBestValues } from "../utils/findBestLevel";
@@ -19,14 +23,14 @@ const EndTitle = ({
   const lastLevelScore = useStore((state) => state.lastLevelScore);
   const lastLevel = useStore((state) => state.lastLevel);
   const [bestValues, setBestValues] = useState<LevelScoreType | null>(null);
-  const scores = useStore((state) => state.levelsDone);
+  const levelsDone = localStorageStore((state) => state.levelsDone);
 
   useEffect(() => {
     if (lastLevel) {
-      const best = findBestValues(scores, lastLevel.name);
+      const best = findBestValues(levelsDone, lastLevel.name);
       setBestValues(best);
     }
-  }, [lastLevel, scores]);
+  }, [lastLevel, levelsDone]);
 
   if (!isOpen) return <></>;
   return (

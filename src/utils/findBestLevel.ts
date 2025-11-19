@@ -4,6 +4,7 @@ export const findBestValues = (
   levelsDone: LevelScoreType[],
   levelName: string,
 ): LevelScoreType | null => {
+  if (levelsDone.length <= 0) return null;
   const scores = levelsDone.filter(
     (currentLevel) => currentLevel.levelName === levelName,
   );

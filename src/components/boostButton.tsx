@@ -1,12 +1,19 @@
-import { useEffect, useRef, type ReactNode } from "react";
-import { useStore } from "../store/store";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { globals, useStore } from "../store/store";
 
 const BoostButton = (): ReactNode => {
   const thrustButtonRef = useRef<HTMLDivElement>(null);
 
   const setIsThrusting = useStore((s) => s.setIsThrusting);
   const isThrusting = useStore((s) => s.isThrusting);
-  const thrustSpeed = useStore((s) => s.thrustSpeed);
+  const [thrustSpeed, setThrustSpeed] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setThrustSpeed(globals.thrustSpeed);
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const thrustButton = thrustButtonRef.current;
@@ -73,14 +80,10 @@ const BoostButton = (): ReactNode => {
         </div>
         <div className="absolute bottom-0 left-2 right-2 h-10 bg-slate-950 rounded-t-md overflow-hidden custom-light-border">
           <div
-            className="absolute inset-0 origin-left bg-red-900"
+            className="absolute inset-0 origin-left bg-red-900 duration-200 ease-out"
             style={{
               transform: `scaleX(${Math.log2(Math.max(thrustSpeed * 0.1, 0.001))})`,
             }}
-          ></div>
-          <div
-            className="absolute inset-0 origin-left bg-red-700 z-10"
-            style={{ transform: `scaleX(${thrustSpeed * 0.01})` }}
           ></div>
         </div>
       </div>

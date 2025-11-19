@@ -1,17 +1,17 @@
 import Matter, { Engine, Body } from "matter-js";
 import { eventEmitter } from "../utils/eventEmitter";
-import { useStore } from "../store/store";
+import { globals, localStorageStore, useStore } from "../store/store";
 
 const triggerEndLevel = () => {
   const last = useStore.getState().lastLevel;
 
   if (last == null) return;
 
-  const currentTime = useStore.getState().currentTimePassed;
+  const currentTime = globals.currentTime;
   const health = useStore.getState().health;
 
   if (useStore.getState().health > 0) {
-    useStore.getState().addLevelScore({
+    localStorageStore.getState().addLevelScore({
       levelName: last.name,
       time: currentTime,
       health: health,

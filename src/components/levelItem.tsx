@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { LevelType } from "../levels";
-import { useStore, type LevelScoreType } from "../store/store";
+import { localStorageStore, type LevelScoreType } from "../store/store";
 import { cn } from "../utils/cn";
 import { eventEmitter } from "../utils/eventEmitter";
 import Button from "./button";
@@ -12,7 +12,7 @@ export interface LevelItemTypes {
 }
 
 const LevelItem = ({ level, action }: LevelItemTypes) => {
-  const levelsDone = useStore((state) => state.levelsDone);
+  const levelsDone = localStorageStore((state) => state.levelsDone);
   const [bestValues, setBestValues] = useState<LevelScoreType | null>(null);
 
   useEffect(() => {

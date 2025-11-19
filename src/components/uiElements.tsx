@@ -1,4 +1,5 @@
-import { useStore } from "../store/store";
+import { useEffect, useState } from "react";
+import { globals, useStore } from "../store/store";
 import EndTitle from "./endTitle";
 import GameMenu from "./gameMenu";
 import LevelSelector from "./levelSelector";
@@ -14,6 +15,14 @@ const UiElements = () => {
     (state) => state.setIsLevelSelectorOpen,
   );
   const playerHealth = useStore((state) => state.health);
+  const [timePassed, setTimePassed] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimePassed(globals.currentTime);
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
@@ -37,6 +46,9 @@ const UiElements = () => {
             <div className="bg-[url(/strikes.png)] absolute inset-0 opacity-20"></div>
           </div>
         </div>
+      </div>
+      <div className="absolute top-2 right-3 text-white font-black custom-text-border font-mono z-10">
+        {(timePassed / 1000).toFixed(2)}s
       </div>
       <LevelSelector
         isOpen={isLevelSelectorOpen}

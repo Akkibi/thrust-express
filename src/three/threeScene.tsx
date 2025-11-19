@@ -3,12 +3,11 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { SceneManager } from "./scene.ts";
 import JoyStick from "../components/joystick.tsx";
 import BoostButton from "../components/boostButton.tsx";
-import { useStore } from "../store/store.tsx";
 
 const ThreeManager = (): ReactNode => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const sceneManager = useRef<SceneManager>(null);
-  const timePassed = useStore((state) => state.currentTimePassed);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -25,9 +24,6 @@ const ThreeManager = (): ReactNode => {
       <div className="absolute bottom-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover -rotate-90"></div>
       <JoyStick />
       <BoostButton />
-      <div className="absolute top-2 right-3 text-white font-black custom-text-border font-mono z-10">
-        {(timePassed / 1000).toFixed(2)}s
-      </div>
     </>
   );
 };
