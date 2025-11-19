@@ -1,22 +1,38 @@
 import Matter, { Engine, Body } from "matter-js";
 import { eventEmitter } from "../utils/eventEmitter";
 import { useStore } from "../store/store";
-import { lastLevel } from "../levels";
 
-const triggerEndScreen = () => {
-  console.log("ResetGame");
-  eventEmitter.trigger("goalReached", [
-    useStore.getState().health,
-    useStore.getState().currentTimePassed,
-  ]);
-  useStore.setState({ isPaused: true, isEndTitle: true });
-  const last = lastLevel.level;
-  if (useStore.getState().health <= 0 || last == null) return;
-  useStore.getState().levelsDone.push({
-    levelName: last.name,
-    time: useStore.getState().currentTimePassed,
-    score: useStore.getState().score,
+const triggerEndLevel = () => {
+  const last = useStore.getState().lastLevel;
+
+  if (last == null) return;
+
+  const currentTime = useStore.getState().currentTimePassed;
+  const health = useStore.getState().health;
+
+  if (useStore.getState().health > 0) {
+    useStore.getState().addLevelScore({
+      levelName: last.name,
+      time: currentTime,
+      health: health,
+    });
+    useStore.setState({
+      lastLevelScore: {
+        levelName: last.name,
+        time: currentTime,
+        health: health,
+      },
+    });
+  } else {
+    useStore.setState({
+      lastLevelScore: null,
+    });
+  }
+  useStore.setState({
+    isPaused: true,
+    isEndTitle: true,
   });
+  eventEmitter.trigger("goalReached", [currentTime, health]);
 };
 
 export class CollisionWatcher {
@@ -47,12 +63,12 @@ export class CollisionWatcher {
         console.log("Collision to wall");
         useStore.setState({ health: useStore.getState().health - 20 });
         if (useStore.getState().health <= 0) {
-          triggerEndScreen();
+          triggerEndLevel();
         }
       }
 
       if (isGoal && isPlayer) {
-        triggerEndScreen();
+        triggerEndLevel();
       } else if (bodyA === this.player) {
         this.currentCollisions.add(bodyB);
       } else if (bodyB === this.player) {

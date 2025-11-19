@@ -10,7 +10,7 @@ import { JoystickHandler } from "../utils/joystickHandler";
 import { CollisionWatcher } from "../matter/collisions";
 import { Cheats } from "../utils/cheats";
 import { eventEmitter } from "../utils/eventEmitter";
-import levels, { lastLevel, type LevelType } from "../levels";
+import levels, { type LevelType } from "../levels";
 
 export class SceneManager {
   private cheats: Cheats;
@@ -77,7 +77,7 @@ export class SceneManager {
   }
 
   private nextLevel() {
-    const currentLevel = lastLevel.level;
+    const currentLevel = useStore.getState().lastLevel;
     if (!currentLevel) return;
     const currentLevelIndex = levels.indexOf(currentLevel);
     this.restart(levels[currentLevelIndex + 1]);
@@ -110,7 +110,7 @@ export class SceneManager {
     if (!currentLevel || !currentLevel.map) {
       this.loadEndless();
     } else {
-      lastLevel.level = currentLevel;
+      useStore.setState({ lastLevel: currentLevel });
       this.loadLevel(currentLevel);
     }
   };

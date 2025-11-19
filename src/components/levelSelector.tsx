@@ -1,4 +1,5 @@
 import levels from "../levels";
+import Interactions from "./interactions";
 import LevelItem from "./levelItem";
 
 interface LevelSelectorTypes {
@@ -49,6 +50,7 @@ const LevelSelector = ({
           />
         ))}
       </div>
+      <Interactions />
     </div>
   );
 };

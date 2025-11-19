@@ -1,9 +1,10 @@
 import { create } from "zustand";
+import type { LevelType } from "../levels";
 
-interface levelScore {
+export interface LevelScoreType {
   levelName: string;
   time: number;
-  score: number;
+  health: number;
 }
 
 type Store = {
@@ -16,13 +17,14 @@ type Store = {
   setIsThrusting: (isThrusting: boolean) => void;
   health: number;
   setHealth: (health: number) => void;
-  score: number;
-  globalScore: number;
-  levelsDone: levelScore[];
+  levelsDone: LevelScoreType[];
+  addLevelScore: (newLevelScore: LevelScoreType) => void;
   currentTimePassed: number;
   isLevelSelectorOpen: boolean;
   setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) => void;
   thrustSpeed: number;
+  lastLevel: LevelType | null;
+  lastLevelScore: LevelScoreType | null;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -39,8 +41,13 @@ export const useStore = create<Store>((set) => ({
   health: 100,
   setHealth: (health: number) => set({ health }),
   score: 0,
-  globalScore: 0,
   levelsDone: [],
+  addLevelScore: (newLevelScore: LevelScoreType) =>
+    set((state) => ({
+      levelsDone: [...state.levelsDone, newLevelScore], // Create a new array
+    })),
   currentTimePassed: 0,
   thrustSpeed: 0,
+  lastLevel: null,
+  lastLevelScore: null,
 }));

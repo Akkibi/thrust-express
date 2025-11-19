@@ -7,10 +7,6 @@ export interface LevelType {
   color: number[];
 }
 
-export const lastLevel: { level: LevelType | null } = {
-  level: null,
-};
-
 const levels: LevelType[] = [
   {
     name: "Tutorial",
@@ -18,7 +14,7 @@ const levels: LevelType[] = [
     map: "/mapData/tuto.json",
     isDone: false,
     best: { score: 0, time: 0 },
-    color: [1, 1, 1],
+    color: [0.5, 1, 0.5],
   },
   {
     name: "Level 1",
@@ -26,7 +22,7 @@ const levels: LevelType[] = [
     map: "/mapData/map1.json",
     isDone: false,
     best: { score: 0, time: 0 },
-    color: [0.5, 0.9, 0.5],
+    color: [0.5, 1, 1],
   },
   {
     name: "Level 2",
@@ -34,7 +30,7 @@ const levels: LevelType[] = [
     map: "/mapData/map2.json",
     isDone: false,
     best: { score: 0, time: 0 },
-    color: [1, 0, 0],
+    color: [0.5, 0.5, 1],
   },
   {
     name: "Level 3",
@@ -42,7 +38,7 @@ const levels: LevelType[] = [
     map: "/mapData/map3.json",
     isDone: false,
     best: { score: 0, time: 0 },
-    color: [1, 0.25, 0.5],
+    color: [1, 1, 0.5],
   },
   {
     name: "Level 4",
@@ -50,7 +46,7 @@ const levels: LevelType[] = [
     map: "/mapData/map4.json",
     isDone: false,
     best: { score: 0, time: 0 },
-    color: [1, 0.1, 0.1],
+    color: [1, 0.5, 1],
   },
   {
     name: "Level 5",
@@ -58,7 +54,7 @@ const levels: LevelType[] = [
     map: "/mapData/map5.json",
     isDone: false,
     best: { score: 0, time: 0 },
-    color: [1, 0.1, 0.1],
+    color: [1, 1, 1],
   },
   {
     name: "Level 6",
@@ -66,7 +62,7 @@ const levels: LevelType[] = [
     map: "/mapData/map6.json",
     isDone: false,
     best: { score: 0, time: 0 },
-    color: [1, 0.1, 0.1],
+    color: [0.5, 0.5, 0.5],
   },
   {
     name: "Level 10",
