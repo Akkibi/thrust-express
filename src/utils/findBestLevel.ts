@@ -1,4 +1,4 @@
-import { type LevelScoreType } from "../store/store";
+import type { LevelScoreType } from "../types/types";
 
 export const findBestValues = (
   levelsDone: LevelScoreType[],
