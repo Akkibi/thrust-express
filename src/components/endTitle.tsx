@@ -110,7 +110,8 @@ const EndTitle = ({
             >
               Back
             </Button>
-            {levels[(lastLevel ? levels.indexOf(lastLevel) : 0) + 1] && (
+            {levels[(lastLevel ? levels.indexOf(lastLevel) : 0) + 1] &&
+            lastLevelScore ? (
               <Button
                 onClick={() => {
                   eventEmitter.trigger("next-level", []);
@@ -120,18 +121,30 @@ const EndTitle = ({
               >
                 Next
               </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  eventEmitter.trigger("start", [lastLevel]);
+                  setIsOpen(false);
+                }}
+                isDisabled={false}
+              >
+                Restart
+              </Button>
             )}
           </div>
-          <button
-            className="relative p-5 cursor-pointer custom-text-border hover:scale-105 active:scale-90 transition-transform duration-300 ease-out active:text-yellow-600 font-mono"
-            type="button"
-            onClick={() => {
-              eventEmitter.trigger("start", [lastLevel]);
-              setIsOpen(false);
-            }}
-          >
-            Restart
-          </button>
+          {lastLevelScore && (
+            <button
+              className="relative p-5 cursor-pointer custom-text-border hover:scale-105 active:scale-90 transition-transform duration-300 ease-out active:text-yellow-600 font-mono"
+              type="button"
+              onClick={() => {
+                eventEmitter.trigger("start", [lastLevel]);
+                setIsOpen(false);
+              }}
+            >
+              Restart
+            </button>
+          )}
         </div>
       </div>
     </div>
