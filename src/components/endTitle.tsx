@@ -1,13 +1,11 @@
 import levels from "../levels";
-import {
-  localStorageStore,
-  useStore,
-  type LevelScoreType,
-} from "../store/store";
+import { useStore } from "../store/store";
 import { eventEmitter } from "../utils/eventEmitter";
 import Button from "./button";
 import { findBestValues } from "../utils/findBestLevel";
 import { useEffect, useState } from "react";
+import { userDataStore } from "../store/userDataStore";
+import type { LevelScoreType } from "../types/types";
 
 interface EndTitleTypes {
   isOpen: boolean;
@@ -23,11 +21,12 @@ const EndTitle = ({
   const lastLevelScore = useStore((state) => state.lastLevelScore);
   const lastLevel = useStore((state) => state.lastLevel);
   const [bestValues, setBestValues] = useState<LevelScoreType | null>(null);
-  const levelsDone = localStorageStore((state) => state.levelsDone);
+  const levelsDone = userDataStore((state) => state.levelsDone);
 
   useEffect(() => {
     if (lastLevel) {
       const best = findBestValues(levelsDone, lastLevel.name);
+
       setBestValues(best);
     }
   }, [lastLevel, levelsDone]);
@@ -62,7 +61,6 @@ const EndTitle = ({
                 : "url(/stars/nostars.svg)",
             }}
           ></div>
-          {lastLevelScore?.health}
           {lastLevelScore ? (
             <>
               <p>
@@ -120,12 +118,12 @@ const EndTitle = ({
                 }}
                 isDisabled={false}
               >
-                Next level
+                Next
               </Button>
             )}
           </div>
           <button
-            className="relative p-5 cursor-pointer custom-text-border hover:scale-105 active:scale-90 transition-transform duration-300 ease-out active:text-yellow-600"
+            className="relative p-5 cursor-pointer custom-text-border hover:scale-105 active:scale-90 transition-transform duration-300 ease-out active:text-yellow-600 font-mono"
             type="button"
             onClick={() => {
               eventEmitter.trigger("start", [lastLevel]);

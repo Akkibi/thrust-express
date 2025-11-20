@@ -1,4 +1,10 @@
 import { type ReactNode } from "react";
+
+interface Document {
+  webkitRequestFullscreen: () => void;
+  mozRequestFullscreen: () => void;
+}
+
 const Interactions = (): ReactNode => {
   return (
     <div
@@ -9,7 +15,7 @@ const Interactions = (): ReactNode => {
           document.exitFullscreen();
           return;
         }
-        const el: HTMLElement | any = document.documentElement;
+        const el = document.documentElement as HTMLElement & Document;
         if (el.requestFullscreen) {
           el.requestFullscreen();
         } else if (el.webkitRequestFullscreen) {

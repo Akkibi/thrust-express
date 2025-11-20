@@ -3,11 +3,11 @@ import gsap from "gsap";
 import { CameraManager } from "./cameraManager";
 import { Environement } from "./environement";
 import Stats from "stats.js";
-import { PhysicsEngine } from "../matter/physics";
+import { PhysicsEngine } from "../matter/physicsEngine";
 import { Player } from "./player";
 import { globals, useStore } from "../store/store";
 import { JoystickHandler } from "../utils/joystickHandler";
-import { CollisionWatcher } from "../matter/collisions";
+import { CollisionWatcher } from "../matter/CollisionWatcher";
 import { Cheats } from "../utils/cheats";
 import { eventEmitter } from "../utils/eventEmitter";
 import levels, { type LevelType } from "../levels";
@@ -26,7 +26,9 @@ export class SceneManager {
   private physicsEngine: PhysicsEngine;
   private collisionWatcher: CollisionWatcher;
 
-  private constructor(canvas: HTMLDivElement) {
+  public constructor(canvas: HTMLDivElement) {
+    SceneManager.instance = this;
+
     // stats
     this.stats = new Stats();
     this.cheats = Cheats.getInstance();
@@ -82,10 +84,7 @@ export class SceneManager {
     const currentLevelIndex = levels.indexOf(currentLevel);
     this.restart(levels[currentLevelIndex + 1]);
   }
-  public static getInstance(canvas: HTMLDivElement): SceneManager {
-    if (!SceneManager.instance) {
-      SceneManager.instance = new SceneManager(canvas);
-    }
+  public static getInstance(): SceneManager {
     return SceneManager.instance;
   }
 

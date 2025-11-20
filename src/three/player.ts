@@ -1,7 +1,7 @@
 import Matter from "matter-js";
 import * as THREE from "three/webgpu";
 import { loadGLTFModel } from "../utils/loadGLTFModel";
-import { mapCoords } from "../matter/physics";
+import { mapCoords } from "../matter/physicsEngine";
 import { useStore } from "../store/store";
 
 export class Player {

@@ -1,5 +1,5 @@
 import * as THREE from "three/webgpu";
-import { mapCoords } from "../matter/physics";
+import { mapCoords } from "../matter/physicsEngine";
 
 const cameraDefaultPosion = new THREE.Vector3(0, 14, 14);
 

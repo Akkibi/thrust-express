@@ -89,6 +89,7 @@ export class PhysicsEngine {
   public restart() {
     // remove all bodies
     Matter.World.clear(this.engine.world, false);
+    console.log("reset physics engine");
   }
 
   public getPlayer = (): Matter.Body | null => this.player;

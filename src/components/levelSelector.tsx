@@ -1,6 +1,9 @@
+import { useRef } from "react";
 import levels from "../levels";
 import Interactions from "./interactions";
 import LevelItem from "./levelItem";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 interface LevelSelectorTypes {
   isOpen: boolean;
@@ -13,6 +16,36 @@ const LevelSelector = ({
   setIsOpen,
   setIsMenuOpen,
 }: LevelSelectorTypes) => {
+  const levelsListElementsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  useGSAP(() => {
+    const levelsListElements = levelsListElementsRef.current;
+    if (levelsListElements.length <= 0 || !isOpen) return;
+    console.log("levelsListElements", levelsListElements);
+    const tl = gsap.timeline();
+    tl.fromTo(
+      levelsListElements,
+      {
+        opacity: 0,
+        rotateX: -80,
+        scale: 0.8,
+      },
+      {
+        scale: 1,
+        rotateX: 0,
+        opacity: 1,
+        duration: 0.5,
+        ease: "back.out",
+        stagger: 0.1,
+      },
+    );
+    tl.play();
+
+    return () => {
+      tl.kill();
+    };
+  }, [isOpen]);
+
   if (!isOpen) return <></>;
   return (
     <div className="bg-slate-800 absolute z-50 inset-0 flex flex-col items-center justify-center overflow-hidden p-3">
@@ -41,13 +74,17 @@ const LevelSelector = ({
           </svg>
         </button>
       </div>
-      <div className="flex flex-col gap-2 w-full h-full p-3 bg-slate-950 rounded-3xl overflow-y-scroll custom-light-border-inset">
+      <div className="flex flex-col gap-2 w-full h-full p-3 bg-slate-950 rounded-3xl overflow-y-scroll custom-light-border-inset perspective-midrange">
         {levels.map((level, index) => (
-          <LevelItem
-            level={level}
-            action={() => setIsOpen(false)}
+          <div
             key={index}
-          />
+            className="h-fit w-full relative origin-top"
+            ref={(el) => {
+              levelsListElementsRef.current[index] = el;
+            }}
+          >
+            <LevelItem level={level} action={() => setIsOpen(false)} />
+          </div>
         ))}
       </div>
       <Interactions />

@@ -1,10 +1,8 @@
 import * as THREE from "three/webgpu";
-import { type PhysicsEngine } from "../matter/physics";
+import { type PhysicsEngine } from "../matter/physicsEngine";
 import type { MapDataType } from "../types/types";
 import { InstanceObjectManager } from "./instancesManager";
 import type { LevelType } from "../levels";
-// import { loadGLTFModel } from "../utils/loadGLTFModel";
-// import { PhysicsEngine } from "../matter/physics";
 
 export class Environement {
   private static instance: Environement;

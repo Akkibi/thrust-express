@@ -1,5 +1,5 @@
 import * as THREE from "three/webgpu";
-import { uv, attribute } from "three/tsl"; // Import attribute
+import { uv, attribute } from "three/tsl";
 import { float, mix, positionLocal, texture } from "three/src/nodes/TSL.js";
 
 export class InstanceObjectManager {

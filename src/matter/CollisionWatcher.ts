@@ -1,6 +1,7 @@
 import Matter, { Engine, Body } from "matter-js";
 import { eventEmitter } from "../utils/eventEmitter";
-import { globals, localStorageStore, useStore } from "../store/store";
+import { globals, useStore } from "../store/store";
+import { userDataStore } from "../store/userDataStore";
 
 const triggerEndLevel = () => {
   const last = useStore.getState().lastLevel;
@@ -11,7 +12,7 @@ const triggerEndLevel = () => {
   const health = useStore.getState().health;
 
   if (useStore.getState().health > 0) {
-    localStorageStore.getState().addLevelScore({
+    userDataStore.getState().addLevelScore({
       levelName: last.name,
       time: currentTime,
       health: health,
@@ -51,7 +52,8 @@ export class CollisionWatcher {
   }
 
   private collisionStart(event: Matter.IEventCollision<Matter.Engine>) {
-    if (!this.player || !this.goal) return;
+    if (!this.player || !this.goal)
+      throw new Error("CollisionWatcher.player or goal is null");
     event.pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
       // console.log(bodyA, bodyB);
@@ -59,15 +61,15 @@ export class CollisionWatcher {
       const isGoal = bodyA === this.goal || bodyB === this.goal;
       const isPlayer = bodyA === this.player || bodyB === this.player;
 
-      if (isPlayer && !isGoal) {
+      if (!isPlayer) return;
+      if (!isGoal) {
         console.log("Collision to wall");
         useStore.setState({ health: useStore.getState().health - 20 });
         if (useStore.getState().health <= 0) {
           triggerEndLevel();
         }
       }
-
-      if (isGoal && isPlayer) {
+      if (isGoal) {
         triggerEndLevel();
       } else if (bodyA === this.player) {
         this.currentCollisions.add(bodyB);
@@ -78,7 +80,7 @@ export class CollisionWatcher {
   }
 
   private collisionEnd(event: Matter.IEventCollision<Matter.Engine>) {
-    if (!this.player) return;
+    if (!this.player) throw new Error("CollisionWatcher.player is null");
     event.pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
       if (bodyA === this.player) {

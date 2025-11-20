@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import type { LevelType } from "../levels";
-import { localStorageStore, type LevelScoreType } from "../store/store";
 import { cn } from "../utils/cn";
 import { eventEmitter } from "../utils/eventEmitter";
 import Button from "./button";
 import { findBestValues } from "../utils/findBestLevel";
+import { userDataStore } from "../store/userDataStore";
+import type { LevelScoreType } from "../types/types";
+import levels from "../levels";
 
 export interface LevelItemTypes {
   level: LevelType;
@@ -12,16 +14,34 @@ export interface LevelItemTypes {
 }
 
 const LevelItem = ({ level, action }: LevelItemTypes) => {
-  const levelsDone = localStorageStore((state) => state.levelsDone);
+  const levelsDone = userDataStore((state) => state.levelsDone);
   const [bestValues, setBestValues] = useState<LevelScoreType | null>(null);
-
+  const [isLastValidated, setIsLastValidated] = useState(false);
   useEffect(() => {
     const best = findBestValues(levelsDone, level.name);
     setBestValues(best);
+
+    if (level.name == "Tutorial") {
+      setIsLastValidated(true);
+    }
+
+    const indexOfLevelBefore = levels.indexOf(level) - 1;
+    if (indexOfLevelBefore < 0) return;
+    const levelBefore = levels[indexOfLevelBefore].name;
+    const isLast = levelsDone.find((level) => level.levelName === levelBefore);
+    if (isLast) {
+      setIsLastValidated(true);
+    }
   }, [levelsDone, level]);
 
   return (
-    <div className=" w-full p-2 bg-slate-600 flex flex-none flex-col relative rounded-xl overflow-clip custom-light-border">
+    <div
+      className={cn(
+        "w-full p-2 flex flex-none flex-col relative rounded-xl overflow-clip custom-light-border",
+        isLastValidated ? "bg-slate-600" : "bg-slate-600/75",
+      )}
+      style={{ opacity: isLastValidated ? 1 : 0.75 }}
+    >
       <div
         className={cn(
           "min-h-fit h-40 bg-slate-800 pb-5 mb-5 relative rounded-lg rounded-b-2xl custom-inner-shadow overflow-clip",
@@ -83,7 +103,7 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
             eventEmitter.trigger("start", [level]);
             action();
           }}
-          isDisabled={!level.map}
+          isDisabled={!level.map || !isLastValidated}
         >
           GO
         </Button>

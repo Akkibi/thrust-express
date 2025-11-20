@@ -1,9 +1,4 @@
-interface terrainBlocksType {
-  straight: blockType;
-  corners: blockType;
-}
-
-type blockType = string[];
+import type { terrainBlocksType } from "../types/types";
 
 export const terrainBlocks: terrainBlocksType = {
   straight: [],
