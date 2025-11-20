@@ -1,7 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,900;1,900&family=Stack+Sans+Text:wght@200..700&display=swap');
 @import "tailwindcss";
 
+
+
+button{
+    font-family: 'Poppins', sans-serif;
+}
+
+.poppins {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Stack Sans Text", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 

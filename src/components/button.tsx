@@ -26,7 +26,7 @@ const Button = ({
       <div className="absolute inset-0.75 bg-yellow-700 rounded-full">
         <div className="absolute inset-1 bg-slate-950 rounded-full"></div>
       </div>
-      <span className="relative italic font-black font-mono">{children}</span>
+      <span className="relative italic font-black uppercase">{children}</span>
     </button>
   );
 };

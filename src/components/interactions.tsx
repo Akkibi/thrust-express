@@ -1,8 +1,13 @@
 import { type ReactNode } from "react";
 
-interface Document {
+interface DocumentElement {
   webkitRequestFullscreen: () => void;
   mozRequestFullscreen: () => void;
+  requestFullscreen: () => void;
+}
+
+interface Document {
+  webkitFullscreenElement: Element | null;
 }
 
 const Interactions = (): ReactNode => {
@@ -11,11 +16,12 @@ const Interactions = (): ReactNode => {
       className="absolute bottom-0 left-0 w-10 h-10 bg-slate-900 text-slate-600 rounded-tr-2xl z-20"
       onClick={() => {
         // request fullscreen
-        if (document.fullscreenElement) {
+        const doc = document as globalThis.Document & Document;
+        if (doc.fullscreenElement || doc.webkitFullscreenElement) {
           document.exitFullscreen();
           return;
         }
-        const el = document.documentElement as HTMLElement & Document;
+        const el = doc.documentElement as HTMLElement & DocumentElement;
         if (el.requestFullscreen) {
           el.requestFullscreen();
         } else if (el.webkitRequestFullscreen) {
