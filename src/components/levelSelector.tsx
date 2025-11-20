@@ -74,11 +74,11 @@ const LevelSelector = ({
           </svg>
         </button>
       </div>
-      <div className="flex flex-col gap-2 w-full h-full p-3 bg-slate-950 rounded-3xl overflow-y-scroll custom-light-border-inset perspective-midrange">
+      <div className="flex flex-col w-full h-full p-3 bg-slate-950 rounded-3xl overflow-y-scroll custom-light-border-inset perspective-midrange">
         {levels.map((level, index) => (
           <div
             key={index}
-            className="h-fit w-full relative origin-top"
+            className="h-fit w-full relative origin-top pb-2"
             ref={(el) => {
               levelsListElementsRef.current[index] = el;
             }}

@@ -65,9 +65,9 @@ h1 {
 
 
 .custom-light-border {
-    box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.25), 5px 5px 10px rgba(0, 0,0, 0.5);
+    box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.15), 5px 5px 10px rgba(0, 0,0, 0.5);
 }
 
 .custom-light-border-inset {
-    box-shadow: 1px 1px 0px rgba(255, 255, 255, 0.25),inset 5px 5px 10px rgba(0, 0,0, 0.5);
+    box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.15),inset 5px 5px 10px rgba(0, 0,0, 0.5);
 }

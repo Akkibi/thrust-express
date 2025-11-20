@@ -8,6 +8,7 @@ import { userDataStore } from "../store/userDataStore";
 import type { LevelScoreType } from "../types/types";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import FlipNumbers from "react-flip-numbers";
 
 interface EndTitleTypes {
   isOpen: boolean;
@@ -66,7 +67,7 @@ const EndTitle = ({
           y: "0%",
           opacity: 1,
           duration: 0.5,
-          ease: "back.out",
+          ease: "expo.out",
         },
       )
         .fromTo(
@@ -79,7 +80,7 @@ const EndTitle = ({
             y: "0%",
             opacity: 1,
             duration: 0.5,
-            ease: "back.out",
+            ease: "expo.out",
           },
           "<",
         )
@@ -87,7 +88,7 @@ const EndTitle = ({
           star1,
           {
             opacity: 1,
-            delay: 0.5,
+            delay: 0.25,
           },
           "<",
         )
@@ -95,7 +96,7 @@ const EndTitle = ({
           star2,
           {
             opacity: 1,
-            delay: 0.5,
+            delay: 0.25,
           },
           "<",
         )
@@ -103,7 +104,7 @@ const EndTitle = ({
           star3,
           {
             opacity: 1,
-            delay: 0.5,
+            delay: 0.25,
           },
           "<",
         );
@@ -125,7 +126,7 @@ const EndTitle = ({
       <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-30 opacity-50 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
       <div className="flex flex-col items-center justify-center w-full h-full py-20">
         <div
-          className="flex flex-col p-2 gap-3 bg-slate-900/20 w-full items-center justify-center relative"
+          className="flex flex-col p-2 gap-3 bg-slate-900/50 w-full items-center justify-center relative"
           ref={sectionTopRef}
         >
           {lastLevelScore ? (
@@ -177,12 +178,22 @@ const EndTitle = ({
           </div>
           {lastLevelScore ? (
             <>
-              <p>
-                <span className="text-yellow-500 font-black custom-text-border text-5xl">
-                  {(lastLevelScore.time / 1000).toFixed(2)}
-                  <span className="text-xl">s</span>
-                </span>
-              </p>
+              <div className="flex flex-row items-end text-yellow-500">
+                <FlipNumbers
+                  height={70}
+                  width={50}
+                  color="#f0b100"
+                  delay={0}
+                  duration={2}
+                  nonNumberClassName="font-black custom-text-border text-5xl"
+                  numberClassName="font-black custom-text-border text-5xl"
+                  background="transparent"
+                  play
+                  perspective={1000}
+                  numbers={(lastLevelScore.time / 1000).toFixed(2).toString()}
+                />
+                <p className="text-xl custom-text-border">s</p>
+              </div>
               {bestValues && bestValues.time >= lastLevelScore.time ? (
                 <>
                   <div className=" w-fit px-5 py-2 font-black bg-linear-to-t from-yellow-900 to-yellow-700 text-yellow-300 border-4 border-solid rounded-lg border-yellow-300 rotate-3">
@@ -210,7 +221,7 @@ const EndTitle = ({
           ref={sectionBottomRef}
         >
           <div
-            className="absolute inset-0 z-0 opacity-20"
+            className="absolute inset-0 z-0 opacity-50"
             style={{
               backgroundSize: "100% 100%",
 

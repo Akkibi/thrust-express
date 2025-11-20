@@ -1,6 +1,8 @@
+import { useRef } from "react";
 import { eventEmitter } from "../utils/eventEmitter";
 import Button from "./button";
 import Interactions from "./interactions";
+import { useGSAP } from "@gsap/react";
 
 interface GameMenuTypes {
   isOpen: boolean;
@@ -13,6 +15,15 @@ const GameMenu = ({
   setIsOpen,
   setLevelSelectorOpen,
 }: GameMenuTypes) => {
+  const container = useRef<HTMLDivElement>(null);
+  const sectionTopRef = useRef<HTMLDivElement>(null);
+  const sectionBottomRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {}, {
+    scope: container,
+    dependencies: [isOpen, sectionTopRef, sectionTopRef],
+  });
+
   if (!isOpen) return <></>;
 
   return (
@@ -25,7 +36,11 @@ const GameMenu = ({
         playsInline
         src="/video-menu.webm"
       ></video>
-      <div className="bg-[url(/logo.png)] bg-contain bg-center bg-no-repeat w-full max-w-96 aspect-video relative"></div>
+      <div
+        className="bg-[url(/logo.png)] bg-contain bg-center bg-no-repeat w-full max-w-96 aspect-video relative
+        ref={sectionTopRef}"
+        ref={sectionTopRef}
+      ></div>
       <div className="h-full relative">
         {/*<svg
           width="16"
@@ -42,7 +57,10 @@ const GameMenu = ({
           <path d="M16 16H10V13H11L13 11V10H16V16Z" fill="#0000FF" />
         </svg>*/}
       </div>
-      <div className="flex flex-row flex-wrap gap-5 pb-[10vh] justify-center items-center">
+      <div
+        className="flex flex-row flex-wrap gap-5 pb-[10vh] justify-center items-center"
+        ref={sectionBottomRef}
+      >
         <Button
           onClick={() => {
             setLevelSelectorOpen(true);
