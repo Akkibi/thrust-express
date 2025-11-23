@@ -53,7 +53,7 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
       >
         <div
           className={cn(
-            "absolute inset-0 scale-95 z-0 opacity-50 bg-center bg-no-repeat bg-contain mix-blend-plus-lighter",
+            "absolute inset-0 scale-95 z-0 opacity-50 bg-center bg-no-repeat bg-contain mix-blend-multiply",
           )}
           style={{
             backgroundImage: `url(/mapImages/${level.image})`,
