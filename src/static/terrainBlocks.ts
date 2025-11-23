@@ -1,6 +1,6 @@
-import type { terrainBlocksType } from "../types/types";
+import type { ITerrainBlocks } from "../types/types";
 
-export const terrainBlocks: terrainBlocksType = {
+export const terrainBlocks: ITerrainBlocks = {
   straight: [],
   corners: [],
 };
