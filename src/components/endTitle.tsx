@@ -126,7 +126,6 @@ const EndTitle = ({
           ">",
         );
     },
-
     {
       scope: containerRef,
       dependencies: [sectionBottomRef, sectionTopRef, isOpen],
@@ -206,7 +205,7 @@ const EndTitle = ({
           </div>
           {lastLevelScore ? (
             <>
-              <div className="flex flex-row items-end text-yellow-500">
+              <div className="flex flex-row items-end text-yellow-500 relative">
                 <FlipNumbers
                   height={70}
                   width={50}
