@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { LevelType } from "../levels";
-import type { LevelScoreType } from "../types/types";
+import type { ILevelScore } from "../types/types";
 
 type Store = {
   isEndTitle: boolean;
@@ -11,7 +11,7 @@ type Store = {
   health: number;
   isLevelSelectorOpen: boolean;
   lastLevel: LevelType | null;
-  lastLevelScore: LevelScoreType | null;
+  lastLevelScore: ILevelScore | null;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
   setIsThrusting: (isThrusting: boolean) => void;
   setHealth: (health: number) => void;
