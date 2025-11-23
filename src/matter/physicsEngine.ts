@@ -71,15 +71,16 @@ export class PhysicsEngine {
         label: "player",
       },
     );
-    this.targetRotation = Math.PI;
-    this.playerRotation = Math.PI;
+    this.targetRotation = -Math.PI / 2;
+    this.playerRotation = -Math.PI / 2;
+    this.step(0);
 
     Matter.World.add(this.engine.world, this.player);
   };
 
   public setGoal = (position: THREE.Vector3) => {
     const newposition = mapCoords(position, true);
-    this.goal = Matter.Bodies.rectangle(newposition.x, newposition.z, 80, 80, {
+    this.goal = Matter.Bodies.circle(newposition.x, newposition.z, 80, {
       isStatic: true,
       label: "goal",
     });

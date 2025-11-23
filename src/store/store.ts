@@ -7,6 +7,7 @@ type Store = {
   setIsEndTitle: (isEndTitle: boolean) => void;
   isMenuOpen: boolean;
   isPaused: boolean;
+  isCutscene: boolean;
   isThrusting: boolean;
   health: number;
   isLevelSelectorOpen: boolean;
@@ -26,6 +27,7 @@ export const globals = {
 export const useStore = create<Store>((set) => ({
   isThrusting: false,
   isPaused: true,
+  isCutscene: true,
   isEndTitle: false,
   isMenuOpen: true,
   isLevelSelectorOpen: false,

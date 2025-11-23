@@ -9,7 +9,7 @@ const ThreeManager = (): ReactNode => {
   const sceneManager = useRef<SceneManager>(null);
 
   useEffect(() => {
-    if (sceneManager.current) return; // already initialized
+    if (sceneManager.current) return; // already initd
 
     const canvas = canvasRef.current;
     if (!canvas) return;

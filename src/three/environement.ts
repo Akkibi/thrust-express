@@ -3,6 +3,7 @@ import { type PhysicsEngine } from "../matter/physicsEngine";
 import type { IMapData } from "../types/types";
 import { InstanceObjectManager } from "./InstanceObjectManager";
 import type { LevelType } from "../levels";
+import { StartEnd } from "./startEnd";
 
 const WALLS_WIDTH = 20;
 const WALLS_HEIGHT = 10;
@@ -17,6 +18,7 @@ export class Environement {
   private mapData: IMapData | null;
   private objectManager: InstanceObjectManager | null;
   private terrainManager: InstanceObjectManager | null;
+  private startEnd: StartEnd;
   // private physicsEngine: PhysicsEngine;
 
   private constructor(scene: THREE.Scene, physicsEngine: PhysicsEngine) {
@@ -29,6 +31,8 @@ export class Environement {
     this.scene.add(this.instanceGroup);
     this.goal = new THREE.Group();
     this.environementBlocks = [];
+    this.startEnd = StartEnd.getInstance();
+    this.startEnd.init(this.scene);
   }
 
   public unloadLevels = () => {
@@ -162,20 +166,16 @@ export class Environement {
     }
     // generate goal
     const goalPosition = this.mapData.goal.position;
-    const cube = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0xffff00 }),
-    );
-    cube.position.set(goalPosition.x, 0, goalPosition.y);
-    this.environementBlocks.push(cube);
-    this.instanceGroup.add(cube);
-    this.physicsEngine.setGoal(cube.position);
+    const position = new THREE.Vector3(goalPosition.x, 0, goalPosition.y);
+    this.physicsEngine.setGoal(position);
+    this.startEnd.setEnd(goalPosition);
 
     // generatePlayer
     const playerPosition = this.mapData.player.position;
     this.physicsEngine.setPlayer(
       new THREE.Vector3(playerPosition.x, 0, playerPosition.y),
     );
+    this.startEnd.setStart(playerPosition);
   }
 
   public loadEndless = () => {

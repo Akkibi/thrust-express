@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { JoystickHandler } from "../utils/joystickHandler";
+import { cn } from "../utils/cn";
+import { useStore } from "../store/store";
 
 const JoyStick = (): ReactNode => {
+  const isCutscene = useStore((state) => state.isCutscene);
   const [isTouchActive, setIsTouchActive] = useState(false);
   const joystickContainerRef = useRef<HTMLDivElement>(null);
   const joyStickKnobRef = useRef<HTMLDivElement>(null);
@@ -70,7 +73,10 @@ const JoyStick = (): ReactNode => {
   }, [isTouchActive]);
 
   return (
-    <div className="absolute inset-0" ref={joystickContainerRef}>
+    <div
+      className={cn("absolute inset-0", isCutscene ? "hidden" : "block")}
+      ref={joystickContainerRef}
+    >
       <div
         className="absolute w-40 h-40 -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-full border-4 border-slate-700 select-none pointer-events-none"
         ref={joystickRef}

@@ -46,11 +46,12 @@ const EndTitle = ({
     () => {
       const sectionTop = sectionTopRef.current;
       const sectionBottom = sectionBottomRef.current;
+      const container = containerRef.current;
 
       const star1 = star1ref.current;
       const star2 = star2ref.current;
       const star3 = star3ref.current;
-      if (!sectionTop || !sectionBottom) return;
+      if (!sectionTop || !sectionBottom || !container) return;
 
       gsap.set(star1, { opacity: 0 });
       gsap.set(star2, { opacity: 0 });
@@ -58,18 +59,33 @@ const EndTitle = ({
 
       const tl = gsap.timeline();
       tl.fromTo(
-        sectionTop,
+        container,
         {
-          y: "-100%",
           opacity: 0,
+          scale: 2,
         },
         {
-          y: "0%",
+          scale: 1,
           opacity: 1,
-          duration: 0.5,
+          duration: 1,
           ease: "expo.out",
         },
       )
+        .fromTo(
+          sectionTop,
+          {
+            y: "-100%",
+            opacity: 0,
+          },
+          {
+            y: "0%",
+            opacity: 1,
+            duration: 1,
+            delay: 0.25,
+            ease: "expo.out",
+          },
+          "<",
+        )
         .fromTo(
           sectionBottom,
           {
@@ -79,7 +95,8 @@ const EndTitle = ({
           {
             y: "0%",
             opacity: 1,
-            duration: 0.5,
+            duration: 1,
+            delay: 0.5,
             ease: "expo.out",
           },
           "<",
@@ -88,7 +105,7 @@ const EndTitle = ({
           star1,
           {
             opacity: 1,
-            delay: 0.25,
+            delay: 0.75,
           },
           "<",
         )
@@ -98,7 +115,7 @@ const EndTitle = ({
             opacity: 1,
             delay: 0.25,
           },
-          "<",
+          ">",
         )
         .set(
           star3,
@@ -106,7 +123,7 @@ const EndTitle = ({
             opacity: 1,
             delay: 0.25,
           },
-          "<",
+          ">",
         );
     },
 
@@ -119,11 +136,11 @@ const EndTitle = ({
   if (!isOpen) return <></>;
   return (
     <div
-      className="absolute z-50 inset-0 bg-black/50 flex flex-col items-center justify-center"
+      className="absolute z-50 inset-0 flex bg-black/20 flex-col items-center justify-center"
       ref={containerRef}
     >
-      <div className=" bg-black select-none pointer-events-none absolute top-0 h-30 opacity-50 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
-      <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-30 opacity-50 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
+      <div className=" bg-slate-950 select-none pointer-events-none absolute top-0 h-[30vh] opacity-50 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
+      <div className=" bg-slate-950 select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-50 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
       <div className="flex flex-col items-center justify-center w-full h-full py-20">
         <div
           className="flex flex-col py-4 gap-3 w-full items-center justify-center relative"

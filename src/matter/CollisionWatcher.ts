@@ -1,7 +1,8 @@
 import Matter, { Engine, Body } from "matter-js";
-import { eventEmitter } from "../utils/eventEmitter";
 import { globals, useStore } from "../store/store";
 import { userDataStore } from "../store/userDataStore";
+import { CameraManager } from "../three/cameraManager";
+import { Player } from "../three/player";
 
 const triggerEndLevel = () => {
   const last = useStore.getState().lastLevel;
@@ -24,16 +25,19 @@ const triggerEndLevel = () => {
         health: health,
       },
     });
+    CameraManager.getInstance().goToGoal();
+    Player.getInstance().goToGoal();
   } else {
     useStore.setState({
       lastLevelScore: null,
+      isPaused: true,
     });
   }
+
   useStore.setState({
-    isPaused: true,
     isEndTitle: true,
   });
-  eventEmitter.trigger("goalReached", [currentTime, health]);
+  // eventEmitter.trigger("goalReached", [currentTime, health]);
 };
 
 export class CollisionWatcher {
@@ -91,8 +95,8 @@ export class CollisionWatcher {
     });
   }
 
-  public initialize(player: Body, goal: Body): void {
-    console.log("initialize", player, goal);
+  public init(player: Body, goal: Body): void {
+    console.log("init", player, goal);
     this.player = player;
     this.goal = goal;
   }

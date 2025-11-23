@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { globals, useStore } from "../store/store";
+import { cn } from "../utils/cn";
 
 const BoostButton = (): ReactNode => {
-  const thrustButtonRef = useRef<HTMLDivElement>(null);
+  const thrustButtonRef = useRef<HTMLButtonElement>(null);
 
   const setIsThrusting = useStore((s) => s.setIsThrusting);
   const isThrusting = useStore((s) => s.isThrusting);
   const [thrustSpeed, setThrustSpeed] = useState(0);
+  const isCutscene = useStore((s) => s.isCutscene);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -56,7 +58,12 @@ const BoostButton = (): ReactNode => {
   }, [thrustButtonRef, setIsThrusting]);
 
   return (
-    <div className="absolute bottom-0 right-0 w-30 h-40 bg-slate-700 rounded-tl-4xl custom-light-border">
+    <div
+      className={cn(
+        "absolute bottom-0 right-0 w-30 h-40 bg-slate-700 rounded-tl-4xl custom-light-border pointer-events-auto",
+        isCutscene ? "opacity-50" : "opacity-100",
+      )}
+    >
       <div className="absolute bottom-0 right-0 w-28 h-38 bg-slate-900 rounded-tl-3xl custom-inner-shadow">
         <div className="absolute left-1/2 top-2 -translate-x-1/2 w-22 h-22 bg-slate-950 rounded-full custom-inner-shadow">
           <div
@@ -65,17 +72,17 @@ const BoostButton = (): ReactNode => {
               opacity: isThrusting ? 0.5 : 1,
             }}
           >
-            <div
+            <button
               className="absolute left-1/2 top-1/2 -translate-x-1/2 w-20 h-20 bg-red-700 rounded-full custom-light-border"
               style={{
                 transform: `translateY(${isThrusting ? "-50%" : "-55%"})`,
               }}
               ref={thrustButtonRef}
             >
-              <p className="text-white font-black text-center w-full absolute top-1/2 -translate-y-1/2 -tracking-widest select-none">
+              <p className="text-white font-black text-center w-full absolute top-1/2 -translate-y-1/2 -tracking-widest select-none custom-text-border italic opacity-50">
                 BOOST
               </p>
-            </div>
+            </button>
           </div>
         </div>
         <div className="absolute bottom-0 left-2 right-2 h-10 bg-slate-950 rounded-t-md overflow-hidden custom-light-border">

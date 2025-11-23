@@ -43,7 +43,8 @@ export class SceneManager {
     this.physicsEngine = PhysicsEngine.getInstance();
     this.scene = new THREE.Scene();
 
-    this.player = Player.getInstance(this.scene);
+    this.player = Player.getInstance();
+    this.player.setScene(this.scene);
     this.collisionWatcher = CollisionWatcher.getInstance(
       this.physicsEngine.engine,
     );
@@ -53,7 +54,8 @@ export class SceneManager {
     this.renderer.init();
     this.renderer.shadowMap.enabled = true;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.camera = CameraManager.getInstance(this.scene);
+    this.camera = CameraManager.getInstance();
+    this.camera.setScene(this.scene);
     this.env = Environement.getInstance(this.scene, this.physicsEngine);
     // ambian light
     const ambientLight = new THREE.AmbientLight(0x9090c0);
@@ -78,14 +80,15 @@ export class SceneManager {
     gsap.ticker.add((time, deltatime) => this.animate(time, deltatime));
   }
 
+  public static getInstance(): SceneManager {
+    return SceneManager.instance;
+  }
+
   private nextLevel() {
     const currentLevel = useStore.getState().lastLevel;
     if (!currentLevel) return;
     const currentLevelIndex = levels.indexOf(currentLevel);
     this.restart(levels[currentLevelIndex + 1]);
-  }
-  public static getInstance(): SceneManager {
-    return SceneManager.instance;
   }
 
   private resize() {
@@ -103,6 +106,7 @@ export class SceneManager {
   }
 
   public restart = (level?: LevelType) => {
+    gsap.globalTimeline.clear();
     const currentLevel = level;
     this.physicsEngine.restart();
     eventEmitter.trigger("loading", [true]);
@@ -136,9 +140,12 @@ export class SceneManager {
       const player = this.physicsEngine.getPlayer();
       const goal = this.physicsEngine.getGoal();
       if (!player || !goal) return;
-      this.collisionWatcher.initialize(player, goal);
-      this.player.initialize(player);
-      this.camera.initialize(player);
+      this.collisionWatcher.init(player, goal);
+      this.player.init(player);
+      this.camera.setPlayer(player);
+      this.camera.goToStart();
+      this.player.goToStart();
+      this.joystickHandler.setJoyStickAngle(-Math.PI / 2);
       eventEmitter.trigger("loading", [false]);
     });
   };
@@ -146,16 +153,17 @@ export class SceneManager {
   private animate(time: number, deltatime: number) {
     this.stats.begin();
     if (useStore.getState().isPaused) return;
+    if (!useStore.getState().isCutscene) {
+      globals.currentTime += deltatime;
+      this.physicsEngine.targetRotation = this.joystickHandler.getAngle();
+
+      this.physicsEngine.update(deltatime);
+
+      this.player.update(time, deltatime);
+      this.camera.update(deltatime);
+    }
+
     this.renderer.render(this.scene, this.camera.getCamera());
-
-    this.physicsEngine.targetRotation = this.joystickHandler.getAngle();
-
-    this.physicsEngine.update(deltatime);
-
-    this.player.update(time, deltatime);
-    this.camera.update(deltatime);
-
-    globals.currentTime += deltatime;
     this.stats.end();
   }
 
