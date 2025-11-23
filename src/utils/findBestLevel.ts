@@ -29,3 +29,21 @@ export const findBestValues = (
     time: bestTime.time,
   };
 };
+
+export const orderBestValues = (
+  levelsDone: LevelScoreType[],
+  levelName: string,
+): LevelScoreType[] => {
+  if (levelsDone.length <= 0) return [];
+  const scores = levelsDone.filter(
+    (currentLevel) => currentLevel.levelName === levelName,
+  );
+
+  if (scores.length <= 0) return [];
+
+  // order scores by less time
+  return scores.sort((a, b) => {
+    if (a.time !== b.time) return a.time - b.time;
+    return b.health - a.health;
+  });
+};

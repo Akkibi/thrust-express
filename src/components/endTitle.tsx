@@ -5,7 +5,7 @@ import Button from "./button";
 import { findBestValues } from "../utils/findBestLevel";
 import { useEffect, useRef, useState } from "react";
 import { userDataStore } from "../store/userDataStore";
-import type { LevelScoreType } from "../types/types";
+import type { ILevelScore } from "../types/types";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import FlipNumbers from "react-flip-numbers";
@@ -23,7 +23,7 @@ const EndTitle = ({
 }: EndTitleTypes) => {
   const lastLevelScore = useStore((state) => state.lastLevelScore);
   const lastLevel = useStore((state) => state.lastLevel);
-  const [bestValues, setBestValues] = useState<LevelScoreType | null>(null);
+  const [bestValues, setBestValues] = useState<ILevelScore | null>(null);
   const levelsDone = userDataStore((state) => state.levelsDone);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,18 +126,29 @@ const EndTitle = ({
       <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-30 opacity-50 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
       <div className="flex flex-col items-center justify-center w-full h-full py-20">
         <div
-          className="flex flex-col p-2 gap-3 bg-slate-900/50 w-full items-center justify-center relative"
+          className="flex flex-col py-4 gap-3 w-full items-center justify-center relative"
           ref={sectionTopRef}
         >
+          <div
+            className="absolute inset-0 z-0 opacity-75 -scale-y-100"
+            style={{
+              backgroundSize: "100% 100%",
+
+              backgroundImage: "url(/end-bg.svg)",
+            }}
+          ></div>
+
           {lastLevelScore ? (
             <>
-              <div className="text-base font-bold text-yellow-500">
+              <div className="text-base font-bold text-yellow-500 relative">
                 Package Delivered !
               </div>
             </>
           ) : (
             <>
-              <div className="text-xl font-bold text-white">Game Over</div>
+              <div className="text-xl font-bold text-white relative">
+                Game Over
+              </div>
             </>
           )}
           <div
@@ -196,12 +207,12 @@ const EndTitle = ({
               </div>
               {bestValues && bestValues.time >= lastLevelScore.time ? (
                 <>
-                  <div className=" w-fit px-5 py-2 font-black bg-linear-to-t from-yellow-900 to-yellow-700 text-yellow-300 border-4 border-solid rounded-lg border-yellow-300 rotate-3">
+                  <div className=" w-fit px-5 py-2 font-black bg-linear-to-t from-yellow-900 to-yellow-700 text-yellow-300 border-4 border-solid rounded-lg border-yellow-300 rotate-3 relative">
                     BEST TIME
                   </div>
                 </>
               ) : (
-                <p>
+                <p className="relative">
                   <span className="text-xs font-bold">Best : </span>
                   <span className="text-yellow-500 font-black custom-text-border text-xs">
                     {(bestValues ? bestValues.time / 1000 : 0).toFixed(2)}s
@@ -210,7 +221,7 @@ const EndTitle = ({
               )}
             </>
           ) : (
-            <p className="text-xs font-bold text-slate-400">
+            <p className="text-xs font-bold text-slate-400 relative">
               Still waiting for my package to arrive ..
             </p>
           )}
@@ -221,7 +232,7 @@ const EndTitle = ({
           ref={sectionBottomRef}
         >
           <div
-            className="absolute inset-0 z-0 opacity-50"
+            className="absolute inset-0 z-0 opacity-75"
             style={{
               backgroundSize: "100% 100%",
 

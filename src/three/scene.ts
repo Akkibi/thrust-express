@@ -16,7 +16,7 @@ export class SceneManager {
   private cheats: Cheats;
   private static instance: SceneManager;
   public canvas: HTMLDivElement | null;
-  private scene: THREE.Scene;
+  public scene: THREE.Scene;
   private joystickHandler: JoystickHandler;
   private renderer: THREE.WebGPURenderer;
   private camera: CameraManager;
@@ -63,7 +63,6 @@ export class SceneManager {
     sun.position.set(1, 2, -1);
     this.scene.add(sun);
 
-    gsap.ticker.add((time, deltatime) => this.animate(time, deltatime));
     window.addEventListener("resize", this.resize.bind(this));
     if (canvas) {
       this.init(canvas);
@@ -71,11 +70,12 @@ export class SceneManager {
 
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.scene.environment = null;
-    // this.scene.background = new THREE.Color(0x16161d);
     this.scene.background = new THREE.Color(0x000000);
+    // this.scene.background = new THREE.Color(0x16161d);
 
     eventEmitter.on("start", this.restart.bind(this));
     eventEmitter.on("next-level", this.nextLevel.bind(this));
+    gsap.ticker.add((time, deltatime) => this.animate(time, deltatime));
   }
 
   private nextLevel() {
@@ -106,12 +106,14 @@ export class SceneManager {
     const currentLevel = level;
     this.physicsEngine.restart();
     eventEmitter.trigger("loading", [true]);
-    if (!currentLevel || !currentLevel.map) {
-      this.loadEndless();
-    } else {
-      useStore.setState({ lastLevel: currentLevel });
-      this.loadLevel(currentLevel);
-    }
+    requestAnimationFrame(() => {
+      if (!currentLevel || !currentLevel.map) {
+        this.loadEndless();
+      } else {
+        useStore.setState({ lastLevel: currentLevel });
+        this.loadLevel(currentLevel);
+      }
+    });
   };
 
   private loadEndless = () => {

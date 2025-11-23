@@ -62,8 +62,8 @@ export class PhysicsEngine {
     this.player = Matter.Bodies.rectangle(
       newposition.x,
       newposition.z,
-      80,
-      40,
+      60,
+      30,
       {
         restitution: 0,
         frictionAir: 0,
@@ -71,7 +71,8 @@ export class PhysicsEngine {
         label: "player",
       },
     );
-    this.targetRotation = Math.PI / 2;
+    this.targetRotation = Math.PI;
+    this.playerRotation = Math.PI;
 
     Matter.World.add(this.engine.world, this.player);
   };

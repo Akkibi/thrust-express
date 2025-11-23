@@ -1,24 +1,27 @@
-export interface MapDataType {
-  walls: PositionType[];
-  optimizedWalls: PositionType[];
-  player: PositionType;
-  goal: PositionType;
+export interface IMapData {
+  size: { x: number; y: number };
+  walls: IObjectMap[];
+  optimizedWalls: IObjectMap[];
+  player: IObjectMap;
+  goal: IObjectMap;
 }
 
-export interface PositionType {
+export type Vec2 = { x: number; y: number };
+
+export interface IObjectMap {
   position: { x: number; y: number };
   scale?: { x: number; y: number };
 }
 
-export interface LevelScoreType {
+export interface ILevelScore {
   levelName: string;
   time: number;
   health: number;
 }
 
-export interface terrainBlocksType {
-  straight: blockType;
-  corners: blockType;
+export interface ITerrainBlocks {
+  straight: Block;
+  corners: Block;
 }
 
-export type blockType = string[];
+export type Block = string[];

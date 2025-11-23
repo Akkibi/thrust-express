@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import type { LevelScoreType } from "../types/types";
+import type { ILevelScore } from "../types/types";
 
 const LOCALSTORAGE_NAME = "thrust-express";
 
 type LocalStorageState = {
-  levelsDone: LevelScoreType[];
-  addLevelScore: (newLevelScore: LevelScoreType) => void;
+  levelsDone: ILevelScore[];
+  addLevelScore: (newLevelScore: ILevelScore) => void;
 };
 
 const getInitialState = () => {
@@ -25,7 +25,7 @@ const getInitialState = () => {
 
 export const userDataStore = create<LocalStorageState>((set) => ({
   ...getInitialState(),
-  addLevelScore: (newLevelScore: LevelScoreType) =>
+  addLevelScore: (newLevelScore: ILevelScore) =>
     set((state) => ({
       levelsDone: [...state.levelsDone, newLevelScore], // Create a new array
     })),

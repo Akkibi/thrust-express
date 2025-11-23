@@ -8,11 +8,11 @@ INPUT_DIR = "public/mapImages"
 OUTPUT_DIR = "public/mapData"
 
 def is_not_black_transparent(pixel):
-    return pixel != (0, 0, 0, 0)
+    return pixel != (0, 0, 0, 255)
 
 def is_blue(pixel):
     r, g, b, a = pixel
-    return b > 200 and r < 100 and g < 100 and a > 0
+    return b > 200 and r > 200 and g > 200 and a > 0
 
 def is_red(pixel):
     r, g, b, a = pixel
@@ -106,7 +106,8 @@ def process_image(image_path, output_path):
     optimized_walls = find_horizontal_lines(wall_grid, width, height)
 
     data = {
-        "walls": walls,
+        "size": {"x": width, "y": height},
+        # "walls": walls,
         "optimizedWalls": optimized_walls,
         "player": player,
         "goal": goal

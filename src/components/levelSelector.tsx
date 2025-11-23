@@ -53,7 +53,7 @@ const LevelSelector = ({
         <p className="w-full text-xl font-black custom-text-border text-center">
           LEVELS
         </p>
-        <div className="bg-[url(/logo.png)] bg-contain bg-center bg-no-repeat h-10 w-20 absolute right-0 top-1/2 -translate-y-1/2"></div>
+        <div className="bg-[url(/logo.webp)] bg-contain bg-center bg-no-repeat h-10 w-20 absolute right-0 top-1/2 -translate-y-1/2"></div>
         <button
           type="button"
           onClick={() => {

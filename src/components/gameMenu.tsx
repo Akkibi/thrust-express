@@ -37,7 +37,7 @@ const GameMenu = ({
         src="/video-menu.webm"
       ></video>
       <div
-        className="bg-[url(/logo.png)] bg-contain bg-center bg-no-repeat w-full max-w-96 aspect-video relative
+        className="bg-[url(/logo.webp)] bg-contain bg-center bg-no-repeat w-full max-w-96 aspect-video relative
         ref={sectionTopRef}"
         ref={sectionTopRef}
       ></div>
@@ -58,7 +58,7 @@ const GameMenu = ({
         </svg>*/}
       </div>
       <div
-        className="flex flex-row flex-wrap gap-5 pb-[10vh] justify-center items-center"
+        className="flex flex-row flex-wrap gap-3 md:gap-10 pb-[10vh] justify-center items-center"
         ref={sectionBottomRef}
       >
         <Button

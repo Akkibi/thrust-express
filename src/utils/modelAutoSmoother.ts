@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three/webgpu";
 
 /**
  * Applies smooth shading to a GLTF model, similar to Blender's "Shade Auto Smooth".
@@ -84,7 +84,7 @@ export function smoothGLTF(gltf: THREE.Object3D, angle: number): void {
         });
       }
 
-      geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+      geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
       geometry.attributes.normal.needsUpdate = true;
     }
   });

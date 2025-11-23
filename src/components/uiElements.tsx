@@ -27,16 +27,22 @@ const UiElements = () => {
   return (
     <>
       <div
-        className="absolute inset-0 bg-yellow-600 select-none pointer-events-none"
+        className="absolute inset-0 bg-red-600 select-none pointer-events-none"
         style={{
           mask: "url(/health-bounds.png) luminance",
           maskSize: "100% 100%",
           opacity: 1 - playerHealth / 100,
         }}
       ></div>
-      <div className="absolute top-5 left-5 h-5 w-14 bg-[url(/logo.png)] bg-cover bg-center bg-no-repeat"></div>
+      <div className="absolute top-5 left-5 h-5 w-14 bg-[url(/logo.webp)] bg-cover bg-center bg-no-repeat"></div>
       <div className="w-[75vw]  md:w-[50vw] rounded-b-lg h-5 bg-slate-900 top-0 absolute left-1/2 -translate-x-1/2">
         <div className="absolute inset-1 bg-yellow-950 rounded-full overflow-clip">
+          <div
+            className="absolute inset-0 bg-white transition-all duration-200 ease-in"
+            style={{
+              width: `${playerHealth}%`,
+            }}
+          ></div>
           <div
             className="absolute inset-0 bg-yellow-500"
             style={{
