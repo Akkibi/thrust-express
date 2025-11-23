@@ -1,9 +1,9 @@
-import type { LevelScoreType } from "../types/types";
+import type { ILevelScore } from "../types/types";
 
 export const findBestValues = (
-  levelsDone: LevelScoreType[],
+  levelsDone: ILevelScore[],
   levelName: string,
-): LevelScoreType | null => {
+): ILevelScore | null => {
   if (levelsDone.length <= 0) return null;
   const scores = levelsDone.filter(
     (currentLevel) => currentLevel.levelName === levelName,
@@ -31,9 +31,9 @@ export const findBestValues = (
 };
 
 export const orderBestValues = (
-  levelsDone: LevelScoreType[],
+  levelsDone: ILevelScore[],
   levelName: string,
-): LevelScoreType[] => {
+): ILevelScore[] => {
   if (levelsDone.length <= 0) return [];
   const scores = levelsDone.filter(
     (currentLevel) => currentLevel.levelName === levelName,
