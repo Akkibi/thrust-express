@@ -30,7 +30,7 @@ export class InstanceObjectManager {
 
   private constructor() {
     const textureLoader = new THREE.TextureLoader();
-    const loadedTexture = textureLoader.load("models/textures/walls.jpg");
+    const loadedTexture = textureLoader.load("models/textures/walls.png");
     loadedTexture.wrapS = THREE.RepeatWrapping;
     loadedTexture.wrapT = THREE.RepeatWrapping;
     loadedTexture.colorSpace = THREE.SRGBColorSpace;

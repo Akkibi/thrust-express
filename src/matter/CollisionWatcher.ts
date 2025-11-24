@@ -1,8 +1,11 @@
-import Matter, { Engine, Body } from "matter-js";
+import Matter, { Engine, Body, Pair } from "matter-js";
 import { globals, useStore } from "../store/store";
 import { userDataStore } from "../store/userDataStore";
 import { CameraManager } from "../three/cameraManager";
 import { Player } from "../three/player";
+import { ParticleSystemManager } from "../three/particlesSystemManager";
+import * as THREE from "three/webgpu";
+import { mapCoords } from "./physicsEngine";
 
 const triggerEndLevel = () => {
   const last = useStore.getState().lastLevel;
@@ -43,7 +46,7 @@ const triggerEndLevel = () => {
 export class CollisionWatcher {
   private static instance: CollisionWatcher;
   private player: Body | null;
-  private currentCollisions: Set<Body>;
+  private currentCollisions: Set<Pair>;
   private goal: Body | null;
 
   private constructor(engine: Engine) {
@@ -61,24 +64,44 @@ export class CollisionWatcher {
     event.pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
       // console.log(bodyA, bodyB);
-
       const isGoal = bodyA === this.goal || bodyB === this.goal;
       const isPlayer = bodyA === this.player || bodyB === this.player;
 
       if (!isPlayer) return;
+
+      // pair.contacts.forEach((contact) => {
+      //   const vertex = contact.vertex;
+      //   const player = this.player;
+      //   if (!vertex || !player) return;
+      //   const threePosition = mapCoords(
+      //     new THREE.Vector3(contact.vertex.x, 0, contact.vertex.y),
+      //     false,
+      //   );
+      //   const playerPosition = mapCoords(
+      //     new THREE.Vector3(player.position.x, 0, player.position.y),
+      //     false,
+      //   );
+      //   const diff = threePosition.clone().sub(playerPosition);
+      //   console.log("diff", diff);
+
+      //   ParticleSystemManager.getInstance().addParticle(
+      //     "/point.png",
+      //     threePosition,
+      //     diff.multiplyScalar(-0.01),
+      //     1000,
+      //   );
+      // });
+
       if (!isGoal) {
         console.log("Collision to wall");
         useStore.setState({ health: useStore.getState().health - 20 });
+        this.currentCollisions.add(pair);
         if (useStore.getState().health <= 0) {
           triggerEndLevel();
         }
       }
       if (isGoal) {
         triggerEndLevel();
-      } else if (bodyA === this.player) {
-        this.currentCollisions.add(bodyB);
-      } else if (bodyB === this.player) {
-        this.currentCollisions.add(bodyA);
       }
     });
   }
@@ -87,10 +110,8 @@ export class CollisionWatcher {
     if (!this.player) throw new Error("CollisionWatcher.player is null");
     event.pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
-      if (bodyA === this.player) {
-        this.currentCollisions.delete(bodyB);
-      } else if (bodyB === this.player) {
-        this.currentCollisions.delete(bodyA);
+      if (bodyA === this.player || bodyB === this.player) {
+        this.currentCollisions.delete(pair);
       }
     });
   }
@@ -108,7 +129,35 @@ export class CollisionWatcher {
     return CollisionWatcher.instance;
   }
 
-  public getCollisions(): Body[] {
+  public getCollisions(): Pair[] {
     return Array.from(this.currentCollisions);
+  }
+
+  public update(): void {
+    if (this.currentCollisions.size <= 0) return;
+    this.currentCollisions.forEach((pair) => {
+      pair.contacts.forEach((contact) => {
+        const vertex = contact.vertex;
+        const player = this.player;
+        if (!vertex || !player) return;
+        const threePosition = mapCoords(
+          new THREE.Vector3(contact.vertex.x, 0, contact.vertex.y),
+          false,
+        );
+        const playerPosition = mapCoords(
+          new THREE.Vector3(player.position.x, 0, player.position.y),
+          false,
+        );
+        const diff = threePosition.clone().sub(playerPosition);
+        // console.log("diff", diff);
+
+        ParticleSystemManager.getInstance().addParticle(
+          threePosition,
+          diff.multiplyScalar(-0.01),
+          10000,
+        );
+        console.log("create new particle");
+      });
+    });
   }
 }

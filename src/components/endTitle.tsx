@@ -223,7 +223,7 @@ const EndTitle = ({
               </div>
               {bestValues && bestValues.time >= lastLevelScore.time ? (
                 <>
-                  <div className=" w-fit px-5 py-2 font-black bg-linear-to-t from-yellow-900 to-yellow-700 text-yellow-300 border-4 border-solid rounded-lg border-yellow-300 rotate-3 relative">
+                  <div className=" w-fit px-5 py-2 font-black bg-linear-to-t from-yellow-900 to-yellow-700 text-yellow-300 border-4 border-solid rounded-lg border-yellow-300 rotate-3 relative shadow-xl">
                     BEST TIME
                   </div>
                 </>

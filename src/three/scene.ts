@@ -11,6 +11,7 @@ import { CollisionWatcher } from "../matter/CollisionWatcher";
 import { Cheats } from "../utils/cheats";
 import { eventEmitter } from "../utils/eventEmitter";
 import levels, { type LevelType } from "../levels";
+import { ParticleSystemManager } from "./particlesSystemManager";
 
 export class SceneManager {
   private cheats: Cheats;
@@ -25,10 +26,10 @@ export class SceneManager {
   private player: Player;
   private physicsEngine: PhysicsEngine;
   private collisionWatcher: CollisionWatcher;
+  private particleSystemManager: ParticleSystemManager;
 
   public constructor(canvas: HTMLDivElement) {
     SceneManager.instance = this;
-
     // stats
     this.stats = new Stats();
     this.cheats = Cheats.getInstance();
@@ -37,6 +38,7 @@ export class SceneManager {
     document.getElementById("threeContainer")?.appendChild(this.stats.dom);
     this.stats.dom.style.position = "absolute";
     this.stats.dom.style.zIndex = "1";
+    this.stats.dom.style.top = "100px";
 
     this.joystickHandler = JoystickHandler.getInstance();
 
@@ -48,6 +50,9 @@ export class SceneManager {
     this.collisionWatcher = CollisionWatcher.getInstance(
       this.physicsEngine.engine,
     );
+
+    this.particleSystemManager = ParticleSystemManager.getInstance();
+    this.particleSystemManager.setScene(this.scene);
 
     this.canvas = canvas;
     this.renderer = new THREE.WebGPURenderer();
@@ -161,6 +166,9 @@ export class SceneManager {
 
       this.player.update(time, deltatime);
       this.camera.update(deltatime);
+      this.particleSystemManager.update(deltatime);
+
+      this.collisionWatcher.update();
     }
 
     this.renderer.render(this.scene, this.camera.getCamera());

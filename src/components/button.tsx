@@ -26,7 +26,7 @@ const Button = ({
       onClick={onClick}
       disabled={isDisabled}
     >
-      <div className="absolute inset-0.75 bg-yellow-700 rounded-full">
+      <div className="absolute inset-0.75 bg-linear-to-t from-yellow-700 to-yellow-600 rounded-full">
         <div className="absolute inset-1 bg-slate-950 rounded-full"></div>
       </div>
       <span className="relative italic font-black uppercase">{children}</span>

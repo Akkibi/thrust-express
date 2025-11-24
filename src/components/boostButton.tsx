@@ -60,7 +60,7 @@ const BoostButton = (): ReactNode => {
   return (
     <div
       className={cn(
-        "absolute bottom-0 right-0 w-30 h-40 bg-slate-700 rounded-tl-4xl custom-light-border pointer-events-auto",
+        "absolute bottom-0 right-0 w-30 h-40 bg-slate-700 rounded-tl-4xl custom-light-border pointer-events-auto block",
         isCutscene ? "opacity-50" : "opacity-100",
       )}
     >
