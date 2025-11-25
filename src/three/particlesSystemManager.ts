@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three/webgpu";
 
 interface Particle {
   position: THREE.Vector3;
@@ -6,6 +6,10 @@ interface Particle {
   lifetime: number;
   maxLifetime: number;
   index: number;
+  scale: THREE.Vector2;
+  rotation: number;
+  color: THREE.Color;
+  color2?: THREE.Color;
 }
 
 export class ParticleSystemManager {
@@ -14,63 +18,59 @@ export class ParticleSystemManager {
   private particles: Particle[] = [];
   private textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
 
-  // Points system components
-  private particleGeometry: THREE.BufferGeometry;
-  private particleMaterial: THREE.PointsMaterial;
-  private particleSystem: THREE.Points;
-  private positions: Float32Array;
-  private colors: Float32Array;
-  private sizes: Float32Array;
+  // Instanced mesh components
+  private particleGeometry: THREE.PlaneGeometry;
+  private particleMaterial: THREE.MeshBasicNodeMaterial;
+  private instancedMesh: THREE.InstancedMesh;
   private maxParticles: number = 10000;
+
+  // Per-instance data
+  private dummy: THREE.Object3D = new THREE.Object3D();
+  private colors: Float32Array;
 
   private constructor() {
     this.scene = null;
 
-    // Initialize particle geometry with buffer attributes
-    this.particleGeometry = new THREE.BufferGeometry();
-    this.positions = new Float32Array(this.maxParticles * 3);
+    // Create a simple plane geometry for each particle
+    this.particleGeometry = new THREE.PlaneGeometry(1, 1);
+
+    // Initialize colors array
     this.colors = new Float32Array(this.maxParticles * 3);
-    this.sizes = new Float32Array(this.maxParticles);
 
-    this.particleGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(this.positions, 3),
-    );
-    this.particleGeometry.setAttribute(
-      "color",
-      new THREE.BufferAttribute(this.colors, 3),
-    );
-    this.particleGeometry.setAttribute(
-      "size",
-      new THREE.BufferAttribute(this.sizes, 1),
-    );
-
-    // Create particle material
-    this.particleMaterial = new THREE.PointsMaterial({
-      size: 5,
-      vertexColors: true,
+    // Create instanced material
+    this.particleMaterial = new THREE.MeshBasicNodeMaterial({
       transparent: true,
-      opacity: 1,
+      opacity: 0.2,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      sizeAttenuation: true,
+      side: THREE.DoubleSide,
     });
 
-    // Create the particle system
-    this.particleSystem = new THREE.Points(
+    // Create instanced mesh
+    this.instancedMesh = new THREE.InstancedMesh(
       this.particleGeometry,
       this.particleMaterial,
+      this.maxParticles,
     );
-    this.particleSystem.position.set(0, 0, 0);
+    this.instancedMesh.frustumCulled = false;
+
+    // Set up color attribute for instancing
+    this.instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(
+      this.colors,
+      3,
+    );
+
+    // Initially no instances are visible
+    this.instancedMesh.count = 0;
   }
 
   public setScene(scene: THREE.Scene) {
-    if (this.scene && this.particleSystem) {
-      this.scene.remove(this.particleSystem);
+    if (this.scene && this.instancedMesh) {
+      this.scene.remove(this.instancedMesh);
     }
     this.scene = scene;
     if (scene) {
-      scene.add(this.particleSystem);
+      scene.add(this.instancedMesh);
     }
   }
 
@@ -104,36 +104,31 @@ export class ParticleSystemManager {
    * @param position The initial position of the particle
    * @param velocity The initial velocity of the particle
    * @param duration The lifespan of the particle in seconds
+   * @param size Optional size for the particle (default: 1)
    * @param color Optional color for the particle (default: white)
-   * @param size Optional size for the particle (default: 0.5)
    */
   public addParticle(
     position: THREE.Vector3,
     velocity: THREE.Vector3,
     duration: number,
+    size: THREE.Vector2 = new THREE.Vector2(1, 1),
+    rotation: number = 0,
     color: THREE.Color = new THREE.Color(0xffffff),
-    size: number = 0.5,
+    color2?: THREE.Color,
   ): void {
-    if (!this.scene) return;
-    if (this.particles.length >= this.maxParticles) {
-      console.warn("Max particles reached");
-      return;
-    }
-
     const index = this.particles.length;
 
-    // Set position
-    this.positions[index * 3] = position.x;
-    this.positions[index * 3 + 1] = position.y;
-    this.positions[index * 3 + 2] = position.z;
+    // Set initial transform
+    this.dummy.position.copy(position);
+    this.dummy.scale.set(size.x, size.y, 1);
+    this.dummy.rotation.set(0, rotation, 0);
+    this.dummy.updateMatrix();
+    this.instancedMesh.setMatrixAt(index, this.dummy.matrix);
 
     // Set color
     this.colors[index * 3] = color.r;
     this.colors[index * 3 + 1] = color.g;
     this.colors[index * 3 + 2] = color.b;
-
-    // Set size
-    this.sizes[index] = size;
 
     // Add to particle array
     this.particles.push({
@@ -142,13 +137,16 @@ export class ParticleSystemManager {
       lifetime: duration,
       maxLifetime: duration,
       index: index,
+      scale: size,
+      rotation: rotation,
+      color: color,
+      color2: color2,
     });
 
-    // Update geometry
-    this.particleGeometry.attributes.position.needsUpdate = true;
-    this.particleGeometry.attributes.color.needsUpdate = true;
-    this.particleGeometry.attributes.size.needsUpdate = true;
-    this.particleGeometry.setDrawRange(0, this.particles.length);
+    // Update instance count
+    this.instancedMesh.count = this.particles.length;
+    this.instancedMesh.instanceMatrix.needsUpdate = true;
+    this.instancedMesh.instanceColor!.needsUpdate = true;
   }
 
   /**
@@ -157,8 +155,8 @@ export class ParticleSystemManager {
    * @param position Center position for the emission
    * @param velocityRange Range for random velocity components
    * @param duration Particle lifespan
-   * @param color Particle color
    * @param size Particle size
+   * @param color Particle color
    */
   public emitBurst(
     count: number,
@@ -169,8 +167,9 @@ export class ParticleSystemManager {
       z: [number, number];
     },
     duration: number,
+    rotation: number = 0,
+    size: THREE.Vector2 = new THREE.Vector2(1, 1),
     color: THREE.Color = new THREE.Color(0xffffff),
-    size: number = 0.5,
   ): void {
     for (let i = 0; i < count; i++) {
       const velocity = new THREE.Vector3(
@@ -181,7 +180,7 @@ export class ParticleSystemManager {
         Math.random() * (velocityRange.z[1] - velocityRange.z[0]) +
           velocityRange.z[0],
       );
-      this.addParticle(position, velocity, duration, color, size);
+      this.addParticle(position, velocity, duration, size, rotation, color);
     }
   }
 
@@ -190,13 +189,14 @@ export class ParticleSystemManager {
    */
   public reset(): void {
     this.particles = [];
-    this.particleGeometry.setDrawRange(0, 0);
+    this.instancedMesh.count = 0;
     console.log("All particles reset.");
   }
 
   /**
    * Updates the position and lifetime of all active particles
    * @param deltaTime The time elapsed since the last update in seconds
+   * @param camera Optional camera for billboard effect (sprites face camera)
    */
   public update(deltaTime: number): void {
     if (!this.scene || this.particles.length === 0) return;
@@ -214,29 +214,58 @@ export class ParticleSystemManager {
       // Update lifetime
       particle.lifetime -= deltaTime;
 
-      // If particle is still alive, update its buffer data
+      // If particle is still alive, update its instance data
       if (particle.lifetime > 0) {
-        // Write to buffer at writeIndex
-        this.positions[writeIndex * 3] = particle.position.x;
-        this.positions[writeIndex * 3 + 1] = particle.position.y;
-        this.positions[writeIndex * 3 + 2] = particle.position.z;
+        // Update transform
+        this.dummy.position.copy(particle.position);
+
+        // Make the particle rotate upwards
+        // this.dummy.quaternion.setFromAxisAngle(
+        //   new THREE.Vector3(1, 0, 0),
+        //   Math.PI / 2,
+        // );
+        this.dummy.rotation.set(Math.PI / 2, 0, -particle.rotation);
+        // this.dummy.quaternion.copy(camera.quaternion);
 
         // Fade out particle as it approaches end of life
         const lifetimeRatio = particle.lifetime / particle.maxLifetime;
-        const fadeStart = 0.3; // Start fading at 30% of lifetime
 
-        if (lifetimeRatio < fadeStart) {
-          const alpha = lifetimeRatio / fadeStart;
-          this.colors[writeIndex * 3] *= alpha;
-          this.colors[writeIndex * 3 + 1] *= alpha;
-          this.colors[writeIndex * 3 + 2] *= alpha;
-          this.sizes[writeIndex] = this.sizes[i] * alpha;
-        } else {
-          this.colors[writeIndex * 3] = this.colors[i * 3];
-          this.colors[writeIndex * 3 + 1] = this.colors[i * 3 + 1];
-          this.colors[writeIndex * 3 + 2] = this.colors[i * 3 + 2];
-          this.sizes[writeIndex] = this.sizes[i];
+        // Scale down as it fades
+        // const originalSize = this.particles[i].maxLifetime; // Store size in a better way if needed
+        if (i == 0) {
+          console.log(lifetimeRatio);
         }
+        this.dummy.scale.set(
+          (1.1 - lifetimeRatio) * this.particles[i].scale.x * 10,
+          (1.1 - lifetimeRatio) * this.particles[i].scale.y * 10,
+          1,
+        );
+        this.dummy.updateMatrix();
+
+        this.instancedMesh.setMatrixAt(writeIndex, this.dummy.matrix);
+
+        let finalColor = particle.color;
+        if (particle.color2) {
+          // Interpolate from color (start) to color2 (end) over lifetime
+          const t = 1 - lifetimeRatio; // 0 at start, 1 at end
+          finalColor = new THREE.Color().lerpColors(
+            particle.color,
+            particle.color2,
+            t,
+          );
+        }
+
+        // Update color with alpha
+        // const originalIndex = i;
+        this.colors[writeIndex * 3] = finalColor.r * lifetimeRatio;
+
+        this.colors[writeIndex * 3 + 1] = finalColor.g * lifetimeRatio;
+
+        this.colors[writeIndex * 3 + 2] = finalColor.b * lifetimeRatio;
+
+        // this.colors[writeIndex * 3] = alpha;
+        // this.colors[writeIndex * 3 + 1] = alpha;
+        // this.colors[writeIndex * 3 + 2] = alpha;
 
         // Keep particle in array at writeIndex
         if (writeIndex !== i) {
@@ -251,24 +280,34 @@ export class ParticleSystemManager {
     // Remove dead particles
     this.particles.length = writeIndex;
 
-    // Update geometry
-    this.particleGeometry.attributes.position.needsUpdate = true;
-    this.particleGeometry.attributes.color.needsUpdate = true;
-    this.particleGeometry.attributes.size.needsUpdate = true;
-    this.particleGeometry.setDrawRange(0, this.particles.length);
+    // Update instance count and data
+    this.instancedMesh.count = this.particles.length;
+    this.instancedMesh.instanceMatrix.needsUpdate = true;
+    if (this.instancedMesh.instanceColor) {
+      this.instancedMesh.instanceColor.needsUpdate = true;
+    }
   }
 
   /**
    * Disposes of all resources
    */
   public dispose(): void {
-    if (this.scene && this.particleSystem) {
-      this.scene.remove(this.particleSystem);
+    if (this.scene && this.instancedMesh) {
+      this.scene.remove(this.instancedMesh);
     }
     this.particleGeometry.dispose();
     this.particleMaterial.dispose();
     if (this.particleMaterial.map) {
       this.particleMaterial.map.dispose();
     }
+  }
+
+  public removeAll(): void {
+    this.particles.forEach((particle) => {
+      particle.lifetime = 0;
+    });
+    this.update(0);
+    this.particles = [];
+    this.instancedMesh.count = 0;
   }
 }

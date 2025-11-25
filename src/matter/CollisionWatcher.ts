@@ -136,27 +136,60 @@ export class CollisionWatcher {
   public update(): void {
     if (this.currentCollisions.size <= 0) return;
     this.currentCollisions.forEach((pair) => {
+      const player = this.player;
+      if (!player) return;
+      const playerPosition = mapCoords(
+        new THREE.Vector3(player.position.x, 0, player.position.y),
+        false,
+      );
       pair.contacts.forEach((contact) => {
         const vertex = contact.vertex;
-        const player = this.player;
-        if (!vertex || !player) return;
+        if (!vertex) return;
         const threePosition = mapCoords(
           new THREE.Vector3(contact.vertex.x, 0, contact.vertex.y),
           false,
         );
-        const playerPosition = mapCoords(
-          new THREE.Vector3(player.position.x, 0, player.position.y),
-          false,
-        );
-        const diff = threePosition.clone().sub(playerPosition);
-        // console.log("diff", diff);
 
-        ParticleSystemManager.getInstance().addParticle(
-          threePosition,
-          diff.multiplyScalar(-0.01),
-          10000,
-        );
-        console.log("create new particle");
+        console.log(globals.thrustSpeed);
+
+        for (let i = 0; i < globals.thrustSpeed; i++) {
+          const randomVector = new THREE.Vector3(
+            Math.random() * 0.1 - 0.05,
+            Math.random() * 0.1 - 0.05,
+            Math.random() * 0.1 - 0.05,
+          );
+          const randomVector2 = new THREE.Vector3(
+            Math.random() * 0.1 - 0.05,
+            Math.random() * 0.1 - 0.05,
+            Math.random() * 0.1 - 0.05,
+          );
+
+          const diff = threePosition
+            .clone()
+            .sub(playerPosition)
+            .add(randomVector)
+            .add(new THREE.Vector3(0, 0.01, 0));
+          // console.log("diff", diff);
+
+          const lastLevelColor = useStore.getState().lastLevel?.color;
+          let particleColor = new THREE.Color(0.5, 0.8, 1);
+          if (lastLevelColor) {
+            particleColor = new THREE.Color(
+              lastLevelColor[0],
+              lastLevelColor[1],
+              lastLevelColor[2],
+            );
+          }
+
+          ParticleSystemManager.getInstance().addParticle(
+            threePosition.add(randomVector2),
+            diff.multiplyScalar(-0.01),
+            10000,
+            new THREE.Vector2(0.1, 0.1),
+            0,
+            particleColor,
+          );
+        }
       });
     });
   }

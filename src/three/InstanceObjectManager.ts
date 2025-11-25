@@ -57,11 +57,15 @@ export class InstanceObjectManager {
 
     // add condition to make t white from 0 to 0.1
     const whiteMask = sinGradient.mul(
-      step(linearGradient, 0.9).oneMinus().mul(0.5).add(0.5),
+      step(linearGradient, 0.9).oneMinus().mul(0.25).add(0.5),
     );
 
+    const topMask = step(linearGradient.sub(0.02), 0.9999).oneMinus();
+
+    const mask = whiteMask.add(topMask.mul(1));
+
     // Create vertical gradient
-    const gradient = mix(bottomColor, mapNode, whiteMask);
+    const gradient = mix(bottomColor, mapNode, mask);
 
     // Combine texture color with gradient
     // const finalColor = mapNode.mul(gradient);

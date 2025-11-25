@@ -2,9 +2,10 @@ import Matter from "matter-js";
 import * as THREE from "three/webgpu";
 import { loadGLTFModel } from "../utils/loadGLTFModel";
 import { mapCoords } from "../matter/physicsEngine";
-import { useStore } from "../store/store";
+import { globals } from "../store/store";
 import { StartEnd } from "./startEnd";
 import gsap from "gsap";
+import { ParticleSystemManager } from "./particlesSystemManager";
 
 const DEFAULT_FLAMES_SCALE = new THREE.Vector3(0.3, 0.4, 0.3);
 
@@ -14,7 +15,6 @@ export class Player {
   private scene: THREE.Scene | null;
   private body: Matter.Body | null;
   private flames: THREE.Object3D[] = [];
-  private isLastThrusting: boolean = false;
 
   public static getInstance(): Player {
     if (!Player._instance) {
@@ -37,6 +37,10 @@ export class Player {
     loadGLTFModel(this.instanceGroup, "/models/ship/spaceship.glb", {
       name: "flame",
       arrayToFill: this.flames,
+    }).then(() => {
+      this.flames.forEach((flame) => {
+        flame.visible = false;
+      });
     });
     this.instanceGroup.scale.set(0.1, 0.1, 0.1);
   }
@@ -57,7 +61,6 @@ export class Player {
       z: goalPosition.y,
       ease: "expo.out",
       duration: 1,
-      onComplete: this.hideFlames,
     });
   }
 
@@ -77,52 +80,88 @@ export class Player {
         ease: "expo.out",
         duration: 1,
         overwrite: true,
-        onComplete: this.showFlames,
       },
     );
   }
 
-  private hideFlames = () => {
-    if (this.flames && this.flames.length > 0) {
-      this.flames.forEach((flame) => {
-        flame.scale.multiplyScalar(0);
-      });
-    }
-  };
+  // private hideFlames = () => {
+  //   if (this.flames && this.flames.length > 0) {
+  //     this.flames.forEach((flame) => {
+  //       flame.scale.multiplyScalar(0);
+  //     });
+  //   }
+  // };
 
-  private showFlames = () => {
-    if (this.flames && this.flames.length > 0) {
-      this.flames.forEach((flame) => {
-        flame.scale.copy(DEFAULT_FLAMES_SCALE);
-      });
-    }
-  };
+  // private showFlames = () => {
+  //   if (this.flames && this.flames.length > 0) {
+  //     this.flames.forEach((flame) => {
+  //       flame.scale.copy(DEFAULT_FLAMES_SCALE);
+  //     });
+  //   }
+  // };
 
   public update(time: number, deltatime: number): void {
     const body = this.body;
     if (!body) return;
 
-    if (this.flames && this.flames.length > 0) {
-      const isThrusting = useStore.getState().isThrusting;
-      if (isThrusting !== this.isLastThrusting) {
-        this.isLastThrusting = isThrusting;
-        if (isThrusting) {
-          this.flames.forEach((flame) => {
-            flame.scale.copy(DEFAULT_FLAMES_SCALE);
-          });
-        } else {
-          this.flames.forEach((flame) => {
-            flame.scale.copy(
-              DEFAULT_FLAMES_SCALE.clone().add(new THREE.Vector3(0, 0.1, 0)),
-            );
-          });
-        }
-      }
-    }
-
     const rotation = -body.angle + Math.PI / 2;
     const position = new THREE.Vector3(body.position.x, 0, body.position.y);
     const newPos = mapCoords(position, false);
+
+    // if (this.flames && this.flames.length > 0) {
+    //   const isThrusting = useStore.getState().isThrusting;
+    //   if (isThrusting !== this.isLastThrusting) {
+    //     this.isLastThrusting = isThrusting;
+    //     if (isThrusting) {
+    //       this.flames.forEach((flame) => {
+    //         flame.scale.copy(DEFAULT_FLAMES_SCALE);
+    //       });
+    //     } else {
+    //       this.flames.forEach((flame) => {
+    //         flame.scale.copy(
+    //           DEFAULT_FLAMES_SCALE.clone().add(new THREE.Vector3(0, 0.1, 0)),
+    //         );
+    //       });
+    //     }
+    //   }
+    // }
+
+    const angleVector = new THREE.Vector3(
+      Math.sin(rotation),
+      0,
+      Math.cos(rotation),
+    );
+
+    this.flames.forEach((flame) => {
+      flame.scale.copy(DEFAULT_FLAMES_SCALE);
+      const worldPos = new THREE.Vector3(0, 0, 0);
+      flame.getWorldPosition(worldPos);
+      ParticleSystemManager.getInstance().addParticle(
+        worldPos.add(angleVector.clone().multiplyScalar(-0.1)),
+        angleVector
+          .clone()
+          .multiplyScalar(globals.thrustSpeed)
+          .multiplyScalar(-0.0001),
+        3000,
+        new THREE.Vector2(
+          0.01 * globals.thrustSpeed,
+          0.03 * globals.thrustSpeed,
+        ),
+        rotation,
+        new THREE.Color(0.2, 0.6, 1),
+        new THREE.Color(0.1, 0.02, 0.5),
+      );
+      // ParticleSystemManager.getInstance().addParticle(
+      //   worldPos.add(angleVector.clone().multiplyScalar(-0.01)),
+      //   angleVector.clone().multiplyScalar(-0.0001),
+      //   3000,
+      //   new THREE.Vector2(
+      //     0.015 * globals.thrustSpeed,
+      //     0.03 * globals.thrustSpeed,
+      //   ),
+      //   rotation,
+      // );
+    });
 
     this.instanceGroup.rotation.set(0, rotation, 0);
     this.instanceGroup.position.set(newPos.x, newPos.y, newPos.z);

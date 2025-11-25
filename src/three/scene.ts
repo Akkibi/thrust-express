@@ -53,6 +53,7 @@ export class SceneManager {
 
     this.particleSystemManager = ParticleSystemManager.getInstance();
     this.particleSystemManager.setScene(this.scene);
+    this.particleSystemManager.setTexture("/point.png");
 
     this.canvas = canvas;
     this.renderer = new THREE.WebGPURenderer();
@@ -114,6 +115,7 @@ export class SceneManager {
     gsap.globalTimeline.clear();
     const currentLevel = level;
     this.physicsEngine.restart();
+    this.particleSystemManager.removeAll();
     eventEmitter.trigger("loading", [true]);
     requestAnimationFrame(() => {
       if (!currentLevel || !currentLevel.map) {
@@ -166,11 +168,11 @@ export class SceneManager {
 
       this.player.update(time, deltatime);
       this.camera.update(deltatime);
-      this.particleSystemManager.update(deltatime);
 
       this.collisionWatcher.update();
     }
 
+    this.particleSystemManager.update(deltatime);
     this.renderer.render(this.scene, this.camera.getCamera());
     this.stats.end();
   }
