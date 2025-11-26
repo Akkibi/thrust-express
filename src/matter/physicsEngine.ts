@@ -57,25 +57,15 @@ export class PhysicsEngine {
   }
 
   public setPlayer = (position: THREE.Vector3) => {
-    const newposition = mapCoords(position, true);
-
-    this.player = Matter.Bodies.rectangle(
-      newposition.x,
-      newposition.z,
-      60,
-      30,
-      {
-        restitution: 0,
-        frictionAir: 0,
-        friction: 0,
-        label: "player",
-      },
-    );
+    this.player = this.addCircle(position, 0.2, true, {
+      restitution: 0,
+      frictionAir: 0,
+      friction: 0,
+      label: "player",
+    });
     this.targetRotation = -Math.PI / 2;
     this.playerRotation = -Math.PI / 2;
     this.step(0);
-
-    Matter.World.add(this.engine.world, this.player);
   };
 
   public setGoal = (position: THREE.Vector3) => {
@@ -102,6 +92,7 @@ export class PhysicsEngine {
     size: THREE.Vector3,
     rotation?: number,
     moving: boolean = false,
+    props?: Matter.IChamferableBodyDefinition,
   ): Matter.Body {
     const newCoord = mapCoords(position, true);
 
@@ -111,7 +102,7 @@ export class PhysicsEngine {
       newCoord.z,
       size.x * Diff_SCALE,
       size.z * Diff_SCALE,
-      { isStatic: !moving },
+      { isStatic: !moving, ...props },
     );
     if (rotation) Matter.Body.rotate(object, rotation);
 
@@ -124,12 +115,14 @@ export class PhysicsEngine {
     position: THREE.Vector3,
     radius: number,
     moving: boolean = false,
+    props?: Matter.IBodyDefinition,
   ): Matter.Body {
     const newCoord = mapCoords(position, true);
     const scaledRadius = radius * 100;
 
-    const circle = Matter.Bodies.circle(newCoord.x, newCoord.y, scaledRadius, {
+    const circle = Matter.Bodies.circle(newCoord.x, newCoord.z, scaledRadius, {
       isStatic: !moving,
+      ...props,
     });
 
     Matter.World.add(this.engine.world, circle);
