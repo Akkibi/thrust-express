@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { globals, useStore } from "../store/store";
 import EndTitle from "./endTitle";
 import GameMenu from "./gameMenu";
 import LevelSelector from "./levelSelector";
 import LoadingScreen from "./loadingScreen";
 import PauseMenu from "./pauseMenu";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 const UiElements = () => {
+  const healthBoundsRef = useRef<HTMLDivElement>(null);
   const isEndTitleOpen = useStore((state) => state.isEndTitle);
   const setEndTitleOpen = useStore((state) => state.setIsEndTitle);
   const [isPauseMenuOpen, setPauseMenuOpen] = useState(false);
@@ -27,19 +30,48 @@ const UiElements = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useGSAP(() => {
+    const healthBounds = healthBoundsRef.current;
+    if (!healthBounds) return;
+
+    const tl = gsap
+      .timeline({
+        defaults: {
+          duration: 0.5,
+          ease: "expo.in",
+        },
+        onComplete: () => {
+          tl.kill();
+        },
+      })
+      .fromTo(
+        healthBounds,
+        { scale: 1 },
+        { duration: 1, overwrite: true, scale: 2, ease: "expo.in" },
+      )
+      .play();
+
+    healthBounds.style.opacity = `${1.2 - playerHealth / 100}`;
+  }, [playerHealth, healthBoundsRef]);
+
   return (
     <>
-      <div
+      {/*<div
         className="absolute inset-0 bg-red-600 select-none pointer-events-none"
         style={{
           mask: "url(/health-bounds.png) luminance",
           maskSize: "100% 100%",
           opacity: 1 - playerHealth / 100,
         }}
+      ></div>*/}
+      <div
+        className="bg-[url(/hit-bounds.png)] absolute inset-0 pointer-events-none mix-blend-lighten bg-cover bg-center bg-no-repeat"
+        ref={healthBoundsRef}
       ></div>
       <div className="w-[75vw]  md:w-[50vw] rounded-b-xl h-8 bg-slate-700 top-0 absolute left-1/2 -translate-x-1/2 ">
-        <div className="absolute left-2 top-0 right-2 bottom-2 bg-slate-900 custom-light-border-inset rounded-b-md">
-          <div className="absolute inset-1 bg-red-950 rounded-full overflow-clip">
+        <div className="absolute left-2 top-0 right-2 bottom-2 bg-slate-900 custom-light-border-inset rounded-b-md flex flex-row gap-1 p-1 pl-0">
+          <div className="w-10 bg-[url(/health-icon.svg)] bg-contain bg-center bg-no-repeat scale-150 relative"></div>
+          <div className="flex-1 bg-red-950 rounded-r-2xl rounded-l-sm overflow-clip relative">
             <div
               className="absolute inset-0 bg-white transition-all duration-200 ease-in"
               style={{

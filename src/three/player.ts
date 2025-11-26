@@ -1,11 +1,12 @@
 import Matter from "matter-js";
 import * as THREE from "three/webgpu";
-import { loadGLTFModel } from "../utils/loadGLTFModel";
+import { find3dElements, loadGLTFModel } from "../utils/loadGLTFModel";
 import { mapCoords } from "../matter/physicsEngine";
-import { globals } from "../store/store";
+import { globals, useStore } from "../store/store";
 import { StartEnd } from "./startEnd";
 import gsap from "gsap";
 import { ParticleSystemManager } from "./particlesSystemManager";
+import { lerp } from "three/src/math/MathUtils.js";
 
 const DEFAULT_FLAMES_SCALE = new THREE.Vector3(0.3, 0.4, 0.3);
 const DEFAULT_SCALE = new THREE.Vector3(0.1, 0.1, 0.1);
@@ -16,6 +17,8 @@ export class Player {
   private scene: THREE.Scene | null;
   private body: Matter.Body | null;
   private flames: THREE.Object3D[] = [];
+  private package: THREE.Object3D[] = [];
+  private packagesDefaultPosition: THREE.Vector3[] = [];
 
   public static getInstance(): Player {
     if (!Player._instance) {
@@ -35,20 +38,30 @@ export class Player {
     // const width = body.bounds.max.x - body.bounds.min.x;
     // const height = body.bounds.max.y - body.bounds.min.y;
     this.instanceGroup = new THREE.Group();
-    loadGLTFModel(this.instanceGroup, "/models/ship/spaceship.glb", {
-      name: "flame",
-      arrayToFill: this.flames,
-    }).then(() => {
-      this.flames.forEach((flame) => {
-        flame.visible = false;
-      });
-    });
+
+    loadGLTFModel(this.instanceGroup, "/models/ship/spaceship.glb").then(
+      (model) => {
+        const elemsArray = find3dElements("flame", model);
+        this.flames.push(...elemsArray);
+        this.flames.forEach((flame) => {
+          flame.visible = false;
+        });
+
+        const parcels = find3dElements("package", model);
+        parcels.forEach((parcel) => {
+          this.packagesDefaultPosition.push(parcel.position.clone());
+        });
+        this.package.push(...parcels);
+      },
+    );
+
     this.instanceGroup.scale.copy(DEFAULT_SCALE);
   }
 
   public init(body: Matter.Body): void {
     this.body = body;
     this.update(0, 0);
+    this.instanceGroup.rotation.z = 0;
   }
 
   public getPosition(): THREE.Vector3 {
@@ -57,15 +70,43 @@ export class Player {
 
   public goToGoal() {
     const goalPosition = StartEnd.getInstance().getEnd();
-    gsap.to(this.instanceGroup.position, {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        tl.kill();
+      },
+    });
+
+    tl.to(this.instanceGroup.position, {
       x: goalPosition.x,
       z: goalPosition.y,
       ease: "expo.out",
       duration: 1,
-    });
+    })
+      .to(
+        this.instanceGroup.rotation,
+        {
+          z: 0,
+          ease: "expo.out",
+          duration: 1,
+        },
+        "<",
+      )
+      .to(
+        [...this.package.map((p) => p.position)],
+        {
+          y: -40,
+          ease: "expo.in",
+          duration: 1,
+        },
+        "0.5",
+      );
   }
 
   public goToStart() {
+    console.log(this.package, this.packagesDefaultPosition);
+    this.package.forEach((parcel, index) => {
+      parcel.position.copy(this.packagesDefaultPosition[index]);
+    });
     this.instanceGroup.scale.copy(DEFAULT_SCALE);
     const startPosition = StartEnd.getInstance().getStart();
     gsap.fromTo(
@@ -184,25 +225,49 @@ export class Player {
       Math.cos(rotation),
     );
 
+    // hurt wiggle
+    const hurtAmount = (100 - useStore.getState().health) * 0.1;
+    const wiggle = Math.sin(time * hurtAmount * 2) * hurtAmount * 0.2;
+    const smoothedWiggle = lerp(
+      this.instanceGroup.rotation.z,
+      wiggle,
+      0.01 * deltatime,
+    );
+
     this.flames.forEach((flame) => {
       flame.scale.copy(DEFAULT_FLAMES_SCALE);
       const worldPos = new THREE.Vector3(0, 0, 0);
       flame.getWorldPosition(worldPos);
+
+      // gradualy change color when hurt to gray
+      const color = new THREE.Color(0.2, 0.6, 1);
+      const hurtColor = new THREE.Color(0.5, 0.25, 0.0);
+
+      color.lerp(hurtColor, hurtAmount * 0.1);
+
+      const color2 = new THREE.Color(0.1, 0.02, 0.5);
+      const hurtColor2 = new THREE.Color(0.5, 0.5, 0.5);
+
+      color2.lerp(hurtColor2, hurtAmount * 0.1);
+
+      const particleSpeed = angleVector
+        .clone()
+        .multiplyScalar(globals.thrustSpeed)
+        .multiplyScalar(-0.0001)
+        .multiplyScalar(1 + hurtAmount * Math.random() * 0.1);
+
       ParticleSystemManager.getInstance().addParticle(
         worldPos.add(angleVector.clone().multiplyScalar(-0.1)),
-        angleVector
-          .clone()
-          .multiplyScalar(globals.thrustSpeed)
-          .multiplyScalar(-0.0001),
+        particleSpeed,
         3000,
         new THREE.Vector2(
           0.01 * globals.thrustSpeed,
           0.03 * globals.thrustSpeed,
         ),
         rotation,
-        new THREE.Color(0.2, 0.6, 1),
+        color,
         0.2,
-        new THREE.Color(0.1, 0.02, 0.5),
+        color2,
       );
       // ParticleSystemManager.getInstance().addParticle(
       //   worldPos.add(angleVector.clone().multiplyScalar(-0.01)),
@@ -216,11 +281,7 @@ export class Player {
       // );
     });
 
-    this.instanceGroup.rotation.set(0, rotation, 0);
+    this.instanceGroup.rotation.set(0, rotation, smoothedWiggle);
     this.instanceGroup.position.lerp(newPos, 0.8);
-
-    if (deltatime < 0) {
-      console.log(time, deltatime);
-    }
   }
 }

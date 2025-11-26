@@ -37,7 +37,7 @@ const PauseMenu = ({
           viewBox="0 0 1920 1920"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M175 .024V1920l1570.845-959.927z" fill-rule="evenodd"></path>
+          <path d="M175 .024V1920l1570.845-959.927z" fillRule="evenodd"></path>
         </svg>
       </button>
       <Button

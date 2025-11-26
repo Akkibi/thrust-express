@@ -20,7 +20,6 @@ const LevelSelector = ({
   useGSAP(() => {
     const levelsListElements = levelsListElementsRef.current;
     if (levelsListElements.length <= 0 || !isOpen) return;
-    console.log("levelsListElements", levelsListElements);
     const tl = gsap.timeline();
     tl.fromTo(
       levelsListElements,

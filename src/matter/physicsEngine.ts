@@ -70,7 +70,7 @@ export class PhysicsEngine {
 
   public setGoal = (position: THREE.Vector3) => {
     const newposition = mapCoords(position, true);
-    this.goal = Matter.Bodies.circle(newposition.x, newposition.z, 80, {
+    this.goal = Matter.Bodies.circle(newposition.x, newposition.z, 100, {
       isStatic: true,
       label: "goal",
     });

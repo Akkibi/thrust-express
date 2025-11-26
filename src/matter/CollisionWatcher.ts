@@ -153,6 +153,10 @@ export class CollisionWatcher {
       }
 
       this.collisionBurst(pair);
+
+      if (useStore.getState().health <= 0) {
+        triggerEndLevel();
+      }
     });
   }
 
