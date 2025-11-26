@@ -17,6 +17,7 @@ type Store = {
   setIsThrusting: (isThrusting: boolean) => void;
   setHealth: (health: number) => void;
   setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) => void;
+  setIsPaused: (isPaused: boolean) => void;
 };
 
 export const globals = {
@@ -35,6 +36,7 @@ export const useStore = create<Store>((set) => ({
   health: 100,
   lastLevel: null,
   lastLevelScore: null,
+  setIsPaused: (isPaused: boolean) => set({ isPaused }),
   setIsThrusting: (isThrusting: boolean) => set({ isThrusting }),
   setIsEndTitle: (isEndTitle: boolean) => set({ isEndTitle }),
   setIsMenuOpen: (isMenuOpen: boolean) => set({ isMenuOpen }),

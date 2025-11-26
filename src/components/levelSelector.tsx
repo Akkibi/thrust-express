@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import levels from "../levels";
-import Interactions from "./interactions";
 import LevelItem from "./levelItem";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -87,7 +86,6 @@ const LevelSelector = ({
           </div>
         ))}
       </div>
-      <Interactions />
     </div>
   );
 };

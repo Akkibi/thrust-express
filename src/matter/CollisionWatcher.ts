@@ -32,9 +32,17 @@ const triggerEndLevel = () => {
     Player.getInstance().goToGoal();
   } else {
     useStore.setState({
-      lastLevelScore: null,
-      isPaused: true,
+      isCutscene: true,
     });
+    Player.getInstance().explode();
+    console.log("explode");
+    setTimeout(() => {
+      useStore.setState({
+        lastLevelScore: null,
+        isPaused: true,
+      });
+      console.log("end");
+    }, 1000);
   }
 
   useStore.setState({
@@ -94,7 +102,8 @@ export class CollisionWatcher {
 
       if (!isGoal) {
         console.log("Collision to wall");
-        useStore.setState({ health: useStore.getState().health - 20 });
+        useStore.setState({ health: useStore.getState().health - 10 });
+        this.collisionBurst(pair);
         this.currentCollisions.add(pair);
         if (useStore.getState().health <= 0) {
           triggerEndLevel();
@@ -136,61 +145,74 @@ export class CollisionWatcher {
   public update(): void {
     if (this.currentCollisions.size <= 0) return;
     this.currentCollisions.forEach((pair) => {
-      const player = this.player;
-      if (!player) return;
-      const playerPosition = mapCoords(
-        new THREE.Vector3(player.position.x, 0, player.position.y),
-        false,
-      );
-      pair.contacts.forEach((contact) => {
-        const vertex = contact.vertex;
-        if (!vertex) return;
-        const threePosition = mapCoords(
-          new THREE.Vector3(contact.vertex.x, 0, contact.vertex.y),
-          false,
-        );
+      // take hit
+      const { bodyA, bodyB } = pair;
+      const isPlayer = bodyA === this.player || bodyB === this.player;
+      if (isPlayer) {
+        useStore.setState({ health: useStore.getState().health - 1 });
+      }
 
-        console.log(globals.thrustSpeed);
-
-        for (let i = 0; i < globals.thrustSpeed; i++) {
-          const randomVector = new THREE.Vector3(
-            Math.random() * 0.1 - 0.05,
-            Math.random() * 0.1 - 0.05,
-            Math.random() * 0.1 - 0.05,
-          );
-          const randomVector2 = new THREE.Vector3(
-            Math.random() * 0.1 - 0.05,
-            Math.random() * 0.1 - 0.05,
-            Math.random() * 0.1 - 0.05,
-          );
-
-          const diff = threePosition
-            .clone()
-            .sub(playerPosition)
-            .add(randomVector)
-            .add(new THREE.Vector3(0, 0.01, 0));
-          // console.log("diff", diff);
-
-          const lastLevelColor = useStore.getState().lastLevel?.color;
-          let particleColor = new THREE.Color(0.5, 0.8, 1);
-          if (lastLevelColor) {
-            particleColor = new THREE.Color(
-              lastLevelColor[0],
-              lastLevelColor[1],
-              lastLevelColor[2],
-            );
-          }
-
-          ParticleSystemManager.getInstance().addParticle(
-            threePosition.add(randomVector2),
-            diff.multiplyScalar(-0.01),
-            10000,
-            new THREE.Vector2(0.1, 0.1),
-            0,
-            particleColor,
-          );
-        }
-      });
+      this.collisionBurst(pair);
     });
   }
+
+  private collisionBurst = (pair: Pair) => {
+    // add particles
+    if (pair.contacts.length <= 0) return;
+    const player = this.player;
+    if (!player) return;
+    const playerPosition = mapCoords(
+      new THREE.Vector3(player.position.x, 0, player.position.y),
+      false,
+    );
+    const currentContact = pair.contacts[0].vertex;
+    const vertex = currentContact;
+    if (!vertex) return;
+    const threePosition = mapCoords(
+      new THREE.Vector3(currentContact.x, 0, currentContact.y),
+      false,
+    );
+
+    for (let i = 0; i < 5; i++) {
+      const randomVector = new THREE.Vector3(
+        Math.random() * 0.1 - 0.05,
+        Math.random() * 0.1 - 0.05,
+        Math.random() * 0.1 - 0.05,
+      ).multiplyScalar(2);
+      const randomVector2 = new THREE.Vector3(
+        Math.random() * 0.1 - 0.05,
+        Math.random() * 0.1 - 0.05,
+        Math.random() * 0.1 - 0.05,
+      );
+
+      const diff = threePosition
+        .clone()
+        .sub(playerPosition)
+        .add(randomVector)
+        .add(new THREE.Vector3(0, 0.01, 0));
+      // console.log("diff", diff);
+
+      const lastLevelColor = useStore.getState().lastLevel?.color;
+      let particleColor = new THREE.Color(0.5, 0.8, 1);
+      if (lastLevelColor) {
+        particleColor = new THREE.Color(
+          lastLevelColor[0],
+          lastLevelColor[1],
+          lastLevelColor[2],
+        );
+      }
+
+      const diffDirection = Math.atan2(diff.x, diff.z);
+
+      ParticleSystemManager.getInstance().addParticle(
+        threePosition.add(randomVector2),
+        diff.multiplyScalar(-0.001).multiplyScalar(globals.thrustSpeed),
+        500 * Math.random() + 500,
+        new THREE.Vector2(0.02, 0.03),
+        diffDirection,
+        particleColor,
+        0.5,
+      );
+    }
+  };
 }

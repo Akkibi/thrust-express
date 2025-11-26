@@ -142,7 +142,7 @@ const EndTitle = ({
       <div className=" bg-slate-950 select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-50 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
       <div className="flex flex-col items-center justify-center w-full h-full py-20">
         <div
-          className="flex flex-col py-4 gap-3 w-full items-center justify-center relative"
+          className="flex flex-col py-2 gap-3 w-full items-center justify-center relative"
           ref={sectionTopRef}
         >
           <div
@@ -237,8 +237,8 @@ const EndTitle = ({
               )}
             </>
           ) : (
-            <p className="text-xs font-bold text-slate-400 relative">
-              Still waiting for my package to arrive ..
+            <p className="text-xs font-regular text-slate-400 relative rounded-2xl bg-slate-900 py-1 px-2 scale-80">
+              Still waiting for my package ..
             </p>
           )}
         </div>

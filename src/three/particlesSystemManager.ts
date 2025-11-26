@@ -10,6 +10,7 @@ interface Particle {
   rotation: number;
   color: THREE.Color;
   color2?: THREE.Color;
+  opacity: number;
 }
 
 export class ParticleSystemManager {
@@ -40,7 +41,7 @@ export class ParticleSystemManager {
     // Create instanced material
     this.particleMaterial = new THREE.MeshBasicNodeMaterial({
       transparent: true,
-      opacity: 0.2,
+      opacity: 1,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       side: THREE.DoubleSide,
@@ -114,6 +115,7 @@ export class ParticleSystemManager {
     size: THREE.Vector2 = new THREE.Vector2(1, 1),
     rotation: number = 0,
     color: THREE.Color = new THREE.Color(0xffffff),
+    opacity: number = 1,
     color2?: THREE.Color,
   ): void {
     const index = this.particles.length;
@@ -136,11 +138,12 @@ export class ParticleSystemManager {
       velocity: velocity.clone(),
       lifetime: duration,
       maxLifetime: duration,
-      index: index,
+      index,
       scale: size,
-      rotation: rotation,
-      color: color,
-      color2: color2,
+      rotation,
+      color,
+      opacity,
+      color2,
     });
 
     // Update instance count
@@ -232,9 +235,7 @@ export class ParticleSystemManager {
 
         // Scale down as it fades
         // const originalSize = this.particles[i].maxLifetime; // Store size in a better way if needed
-        if (i == 0) {
-          console.log(lifetimeRatio);
-        }
+
         this.dummy.scale.set(
           (1.1 - lifetimeRatio) * this.particles[i].scale.x * 10,
           (1.1 - lifetimeRatio) * this.particles[i].scale.y * 10,
@@ -257,11 +258,14 @@ export class ParticleSystemManager {
 
         // Update color with alpha
         // const originalIndex = i;
-        this.colors[writeIndex * 3] = finalColor.r * lifetimeRatio;
+        this.colors[writeIndex * 3] =
+          finalColor.r * lifetimeRatio * particle.opacity;
 
-        this.colors[writeIndex * 3 + 1] = finalColor.g * lifetimeRatio;
+        this.colors[writeIndex * 3 + 1] =
+          finalColor.g * lifetimeRatio * particle.opacity;
 
-        this.colors[writeIndex * 3 + 2] = finalColor.b * lifetimeRatio;
+        this.colors[writeIndex * 3 + 2] =
+          finalColor.b * lifetimeRatio * particle.opacity;
 
         // this.colors[writeIndex * 3] = alpha;
         // this.colors[writeIndex * 3 + 1] = alpha;

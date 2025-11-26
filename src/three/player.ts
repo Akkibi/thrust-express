@@ -8,6 +8,7 @@ import gsap from "gsap";
 import { ParticleSystemManager } from "./particlesSystemManager";
 
 const DEFAULT_FLAMES_SCALE = new THREE.Vector3(0.3, 0.4, 0.3);
+const DEFAULT_SCALE = new THREE.Vector3(0.1, 0.1, 0.1);
 
 export class Player {
   private static _instance: Player;
@@ -42,7 +43,7 @@ export class Player {
         flame.visible = false;
       });
     });
-    this.instanceGroup.scale.set(0.1, 0.1, 0.1);
+    this.instanceGroup.scale.copy(DEFAULT_SCALE);
   }
 
   public init(body: Matter.Body): void {
@@ -65,6 +66,7 @@ export class Player {
   }
 
   public goToStart() {
+    this.instanceGroup.scale.copy(DEFAULT_SCALE);
     const startPosition = StartEnd.getInstance().getStart();
     gsap.fromTo(
       this.instanceGroup.position,
@@ -81,6 +83,56 @@ export class Player {
         duration: 1,
         overwrite: true,
       },
+    );
+  }
+
+  public explode() {
+    this.instanceGroup.scale.multiplyScalar(0);
+
+    const position = this.getPosition();
+
+    for (let i = 0; i < 75; i++) {
+      this.generateExplodeParticle(position);
+    }
+    requestAnimationFrame(() => {
+      for (let i = 0; i < 75; i++) {
+        this.generateExplodeParticle(position);
+      }
+    });
+  }
+
+  private generateExplodeParticle(position: THREE.Vector3) {
+    const randomVelocity = new THREE.Vector3(
+      Math.random() - 0.5,
+      Math.random() - 0.5,
+      Math.random() - 0.5,
+    );
+
+    const expoRandomVelocity = new THREE.Vector3(
+      Math.abs(randomVelocity.x) * randomVelocity.x,
+      Math.abs(randomVelocity.y) * randomVelocity.y,
+      Math.abs(randomVelocity.z) * randomVelocity.z,
+    ).multiplyScalar(0.04);
+
+    const randomValue1 = Math.random();
+    const randomValue2 = Math.random();
+    const randomColor = new THREE.Color(
+      randomValue1,
+      (randomValue1 + randomValue2) / 2,
+      randomValue2,
+    );
+    const randomScale = new THREE.Vector2(
+      Math.random() * 0.5 + 0.5,
+      Math.random() * 0.5 + 0.5,
+    ).multiplyScalar(0.1);
+
+    ParticleSystemManager.getInstance().addParticle(
+      position,
+      expoRandomVelocity,
+      1000 * Math.random(),
+      randomScale,
+      Math.random(),
+      randomColor,
     );
   }
 
@@ -149,6 +201,7 @@ export class Player {
         ),
         rotation,
         new THREE.Color(0.2, 0.6, 1),
+        0.2,
         new THREE.Color(0.1, 0.02, 0.5),
       );
       // ParticleSystemManager.getInstance().addParticle(
@@ -164,7 +217,7 @@ export class Player {
     });
 
     this.instanceGroup.rotation.set(0, rotation, 0);
-    this.instanceGroup.position.set(newPos.x, newPos.y, newPos.z);
+    this.instanceGroup.position.lerp(newPos, 0.8);
 
     if (deltatime < 0) {
       console.log(time, deltatime);

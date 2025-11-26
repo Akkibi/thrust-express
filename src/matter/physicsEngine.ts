@@ -25,7 +25,7 @@ export interface vec2 {
   y: number;
 }
 
-const FIXED_STEP_DELTA = 1 / 60;
+const FIXED_STEP_DELTA = 1 / 30;
 
 export class PhysicsEngine {
   private static _instance: PhysicsEngine;

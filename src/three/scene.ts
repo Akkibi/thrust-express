@@ -1,4 +1,5 @@
 import * as THREE from "three/webgpu";
+import { mul, pass, uniform, uv, vec2, vec4 } from "three/tsl";
 import gsap from "gsap";
 import { CameraManager } from "./cameraManager";
 import { Environement } from "./environement";
@@ -27,6 +28,9 @@ export class SceneManager {
   private physicsEngine: PhysicsEngine;
   private collisionWatcher: CollisionWatcher;
   private particleSystemManager: ParticleSystemManager;
+  private postProcessing: THREE.PostProcessing;
+  private colorShift: THREE.UniformNode<number>;
+  private isPostProcessingEnabled: boolean;
 
   public constructor(canvas: HTMLDivElement) {
     SceneManager.instance = this;
@@ -56,34 +60,105 @@ export class SceneManager {
     this.particleSystemManager.setTexture("/point.png");
 
     this.canvas = canvas;
-    this.renderer = new THREE.WebGPURenderer();
-    this.renderer.init();
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.camera = CameraManager.getInstance();
-    this.camera.setScene(this.scene);
-    this.env = Environement.getInstance(this.scene, this.physicsEngine);
-    // ambian light
-    const ambientLight = new THREE.AmbientLight(0x9090c0);
-    this.scene.add(ambientLight);
-    // sun light
-    const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-    sun.position.set(1, 2, -1);
-    this.scene.add(sun);
-
-    window.addEventListener("resize", this.resize.bind(this));
-    if (canvas) {
-      this.init(canvas);
-    }
-
-    this.renderer.toneMapping = THREE.NoToneMapping;
     this.scene.environment = null;
     this.scene.background = new THREE.Color(0x000000);
+    this.camera = CameraManager.getInstance();
     // this.scene.background = new THREE.Color(0x16161d);
+
+    this.camera.setScene(this.scene);
+    this.env = Environement.getInstance(this.scene, this.physicsEngine);
+
+    window.addEventListener("resize", this.resize.bind(this));
+
+    this.isPostProcessingEnabled = true;
+
+    this.renderer = new THREE.WebGPURenderer({ antialias: false });
+
+    this.renderer.setPixelRatio(window.devicePixelRatio * 0.5);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setClearColor(0x000000);
+
+    this.renderer.init();
+
+    this.renderer.shadowMap.enabled = false;
+    this.renderer.toneMapping = THREE.NoToneMapping;
+    canvas.appendChild(this.renderer.domElement);
+
+    // --- Post Processing ---
+    this.postProcessing = new THREE.PostProcessing(this.renderer);
+
+    const scenePass = pass(this.scene, this.camera.getCamera());
+    const scenePassTexture = scenePass.getTextureNode();
+
+    this.colorShift = uniform(1);
+    const screenUV = uv();
+
+    const shiftedRedUV = screenUV.add(
+      vec2(
+        0.0,
+        screenUV.x
+          .add(1.05)
+          .sin()
+          .mul(mul(this.colorShift, 0.15))
+          .sub(mul(this.colorShift, 0.15)),
+      ),
+    );
+
+    const shiftedGreenUV = screenUV.add(
+      vec2(
+        0.0,
+        screenUV.x
+          .add(1.05)
+          .sin()
+          .mul(mul(this.colorShift, 0.1))
+          .sub(mul(this.colorShift, 0.1)),
+      ),
+    );
+
+    const shiftedBlueUV = screenUV.add(
+      vec2(
+        0.0,
+        screenUV.x
+          .add(1.05)
+          .sin()
+          .mul(mul(this.colorShift, 0.05))
+          .sub(mul(this.colorShift, 0.05)),
+      ),
+    );
+    const shiftRed = scenePassTexture.sample(shiftedRedUV);
+    const shiftGreen = scenePassTexture.sample(shiftedGreenUV);
+    const shiftBlue = scenePassTexture.sample(shiftedBlueUV);
+
+    const originalColor = scenePassTexture.sample(screenUV);
+
+    const finalColor = vec4(
+      shiftRed.r,
+      shiftGreen.g,
+      shiftBlue.b,
+      originalColor.a,
+    );
+
+    this.postProcessing.outputNode = finalColor;
 
     eventEmitter.on("start", this.restart.bind(this));
     eventEmitter.on("next-level", this.nextLevel.bind(this));
+    eventEmitter.on(
+      "update-chromatic-aberration",
+      this.updateChromaticAberration.bind(this),
+    );
+    eventEmitter.on(
+      "toggle-post-processing",
+      this.togglePostProcessing.bind(this),
+    );
     gsap.ticker.add((time, deltatime) => this.animate(time, deltatime));
+  }
+
+  private togglePostProcessing(value: boolean) {
+    this.isPostProcessingEnabled = value;
+  }
+
+  private updateChromaticAberration(value: number) {
+    this.colorShift.value = value;
   }
 
   public static getInstance(): SceneManager {
@@ -102,13 +177,6 @@ export class SceneManager {
     const camera = this.camera.getCamera();
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-  }
-
-  private init(canvas: HTMLDivElement) {
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setClearColor(0x000000);
-    canvas.appendChild(this.renderer.domElement);
   }
 
   public restart = (level?: LevelType) => {
@@ -173,7 +241,12 @@ export class SceneManager {
     }
 
     this.particleSystemManager.update(deltatime);
-    this.renderer.render(this.scene, this.camera.getCamera());
+
+    if (this.isPostProcessingEnabled) {
+      this.postProcessing.render();
+    } else {
+      this.renderer.render(this.scene, this.camera.getCamera());
+    }
     this.stats.end();
   }
 

@@ -3,7 +3,7 @@ import { globals, useStore } from "../store/store";
 import { cn } from "../utils/cn";
 
 const BoostButton = (): ReactNode => {
-  const thrustButtonRef = useRef<HTMLButtonElement>(null);
+  const thrustButtonRef = useRef<HTMLDivElement>(null);
 
   const setIsThrusting = useStore((s) => s.setIsThrusting);
   const isThrusting = useStore((s) => s.isThrusting);
@@ -59,39 +59,43 @@ const BoostButton = (): ReactNode => {
 
   return (
     <div
-      className={cn(
-        "absolute bottom-0 right-0 w-30 h-40 bg-slate-700 rounded-tl-4xl custom-light-border pointer-events-auto block",
-        isCutscene ? "opacity-50" : "opacity-100",
-      )}
+      className="absolute bottom-0 right-0 w-30 h-40 pointer-events-auto block"
+      ref={thrustButtonRef}
     >
-      <div className="absolute bottom-0 right-0 w-28 h-38 bg-slate-900 rounded-tl-3xl custom-inner-shadow">
-        <div className="absolute left-1/2 top-2 -translate-x-1/2 w-22 h-22 bg-slate-950 rounded-full custom-inner-shadow">
-          <div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-red-900 rounded-full"
-            style={{
-              opacity: isThrusting ? 0.5 : 1,
-            }}
-          >
-            <button
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 w-20 h-20 bg-red-700 rounded-full custom-light-border"
+      <div
+        className={cn(
+          "absolute inset-0 bg-slate-700 rounded-tl-full custom-light-border",
+          isCutscene ? "opacity-50" : "opacity-100",
+        )}
+      >
+        <div className="absolute bottom-0 right-0 w-28 h-38 bg-slate-900 rounded-tl-full custom-inner-shadow">
+          <div className="absolute left-1/2 top-2 -translate-x-1/2 w-22 h-22 bg-slate-950 rounded-full custom-inner-shadow">
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-red-900 rounded-full"
               style={{
-                transform: `translateY(${isThrusting ? "-50%" : "-55%"})`,
+                opacity: isThrusting ? 0.5 : 1,
               }}
-              ref={thrustButtonRef}
             >
-              <p className="text-white font-black text-center w-full absolute top-1/2 -translate-y-1/2 -tracking-widest select-none custom-text-border italic opacity-50">
-                BOOST
-              </p>
-            </button>
+              <button
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 w-20 h-20 bg-red-700 rounded-full custom-light-border"
+                style={{
+                  transform: `translateY(${isThrusting ? "-50%" : "-55%"})`,
+                }}
+              >
+                <p className="text-white font-black text-center w-full absolute top-1/2 -translate-y-1/2 -tracking-widest select-none custom-text-border italic opacity-50">
+                  BOOST
+                </p>
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="absolute bottom-0 left-2 right-2 h-10 bg-slate-950 rounded-t-md overflow-hidden custom-light-border">
-          <div
-            className="absolute inset-0 origin-left bg-red-900 duration-200 ease-out"
-            style={{
-              transform: `scaleX(${Math.log2(Math.max(thrustSpeed * 0.1, 0.001))})`,
-            }}
-          ></div>
+          <div className="absolute bottom-0 left-2 right-2 h-10 bg-slate-950 rounded-t-md overflow-hidden custom-light-border">
+            <div
+              className="absolute inset-0 origin-left bg-red-900 duration-200 ease-out"
+              style={{
+                transform: `scaleX(${Math.log2(Math.max(thrustSpeed * 0.1, 0.001))})`,
+              }}
+            ></div>
+          </div>
         </div>
       </div>
     </div>

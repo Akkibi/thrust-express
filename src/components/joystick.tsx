@@ -20,9 +20,10 @@ const JoyStick = (): ReactNode => {
 
     const handleTouchStart = (e: TouchEvent) => {
       e.preventDefault();
+      const touch = e.touches[0];
+      if (touch.clientX > window.innerWidth * 0.6) return;
       setIsTouchActive(true);
       console.log("joystick start");
-      const touch = e.touches[0];
       const x = touch.clientX - joyStick.offsetLeft;
       const y = touch.clientY - joyStick.offsetTop;
       joystickHandler.setInitPos([x, y]);
