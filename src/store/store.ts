@@ -3,6 +3,7 @@ import type { LevelType } from "../levels";
 import type { ILevelScore } from "../types/types";
 
 type Store = {
+  score: number;
   isEndTitle: boolean;
   setIsEndTitle: (isEndTitle: boolean) => void;
   isMenuOpen: boolean;
@@ -13,11 +14,13 @@ type Store = {
   isLevelSelectorOpen: boolean;
   lastLevel: LevelType | null;
   lastLevelScore: ILevelScore | null;
+  isPostProcessingOn: boolean;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
   setIsThrusting: (isThrusting: boolean) => void;
   setHealth: (health: number) => void;
   setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) => void;
   setIsPaused: (isPaused: boolean) => void;
+  setIsPostProcessingOn: (isPostProcessingOn: boolean) => void;
 };
 
 export const globals = {
@@ -27,6 +30,7 @@ export const globals = {
 
 export const useStore = create<Store>((set) => ({
   isThrusting: false,
+  isPostProcessingOn: true,
   isPaused: true,
   isCutscene: true,
   isEndTitle: false,
@@ -36,6 +40,8 @@ export const useStore = create<Store>((set) => ({
   health: 100,
   lastLevel: null,
   lastLevelScore: null,
+  setIsPostProcessingOn: (isPostProcessingOn: boolean) =>
+    set({ isPostProcessingOn }),
   setIsPaused: (isPaused: boolean) => set({ isPaused }),
   setIsThrusting: (isThrusting: boolean) => set({ isThrusting }),
   setIsEndTitle: (isEndTitle: boolean) => set({ isEndTitle }),

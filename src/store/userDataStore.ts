@@ -6,6 +6,7 @@ const LOCALSTORAGE_NAME = "thrust-express";
 type LocalStorageState = {
   levelsDone: ILevelScore[];
   addLevelScore: (newLevelScore: ILevelScore) => void;
+  removeLevelScore: () => void;
 };
 
 const getInitialState = () => {
@@ -28,6 +29,10 @@ export const userDataStore = create<LocalStorageState>((set) => ({
   addLevelScore: (newLevelScore: ILevelScore) =>
     set((state) => ({
       levelsDone: [...state.levelsDone, newLevelScore], // Create a new array
+    })),
+  removeLevelScore: () =>
+    set(() => ({
+      levelsDone: [],
     })),
 }));
 

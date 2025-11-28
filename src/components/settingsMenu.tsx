@@ -1,5 +1,8 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Button from "./button";
+import { removeUserData, userDataStore } from "../store/userDataStore";
+import { cn } from "../utils/cn";
+import { useStore } from "../store/store";
 
 interface ISettingsType {
   isOpen: boolean;
@@ -7,22 +10,170 @@ interface ISettingsType {
 }
 
 const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
-  console.log(isOpen);
+  const [isResetPopupOpen, setIsResetPopupOpen] = useState(false);
+  const levelsDone = userDataStore((state) => state.levelsDone);
+  const resetLevelsDone = userDataStore((state) => state.removeLevelScore);
+  const [isSoundOn, setIsSoundOn] = useState(false);
+  const isPostProcessingOn = useStore((state) => state.isPostProcessingOn);
+  const setIsPostProcessingOn = useStore(
+    (state) => state.setIsPostProcessingOn,
+  );
+  const [volume, setVolume] = useState(50); // 0–100
 
   if (!isOpen) return <></>;
 
   return (
-    <div className="absolute inset-0 z-40 bg-black/40">
-      SETTINGS
-      <Button
-        onClick={() => {
-          setIsOpen(false);
-        }}
-      >
-        close
-      </Button>
+    <div className="absolute inset-0 z-40 bg-slate-950/80 flex flex-col justify-center">
+      <div className=" bg-black select-none pointer-events-none absolute top-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
+      <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
+      <div className="relative w-full h-fit flex flex-col">
+        <div
+          className="mx-5 bg-[url(/settings-bg.webp)] bg-center bg-no-repeat flex flex-col items-center gap-5 py-10 pt-4"
+          style={{ backgroundSize: "100% 100%" }}
+        >
+          <div className="p-2 px-4 custom-text-border text-2xl flex flex-col items-center justify-between gap-2">
+            {levelsDone.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsResetPopupOpen(true);
+                }}
+                className="p-1 px-2 w-fit text-red-800 border border-red-700 bg-red-900/20 text-xs font-light rounded-full font-mono!"
+              >
+                Reset scores
+              </button>
+            )}
+            <p className="w-fit poppins">SETTINGS</p>
+            <div className="w-40 h-0.5 bg-slate-700"></div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="mx-auto w-fit text-center text-slate-400">
+              Post-processing
+            </p>
+            <div
+              className="flex flex-row gap-1 justify-center"
+              onClick={() => {
+                setIsPostProcessingOn(!isPostProcessingOn);
+              }}
+            >
+              <BooleanSelection isOn={isPostProcessingOn}>On</BooleanSelection>
+              <BooleanSelection isOn={!isPostProcessingOn}>
+                Off
+              </BooleanSelection>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="mx-auto w-fit text-center">Sound</p>
+            <div
+              className="flex flex-row gap-1 justify-center"
+              onClick={() => {
+                setIsSoundOn(!isSoundOn);
+              }}
+            >
+              <BooleanSelection isOn={isSoundOn}>On</BooleanSelection>
+              <BooleanSelection isOn={!isSoundOn}>Off</BooleanSelection>
+            </div>
+            <div
+              className={cn(
+                "flex flex-row gap-1 justify-center px-4",
+                isSoundOn ? "opacity-100" : "opacity-50",
+              )}
+            >
+              <button
+                className="w-fit h-fit p-1 px-3 bg-slate-800 border-2 border-slate-700 rounded-md"
+                onClick={() => {
+                  setVolume(Math.max(volume - 1, 0));
+                }}
+              >
+                <p className="text-slate-400 text-2xl">-</p>
+              </button>
+              <div className="w-full">
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={volume}
+                  onChange={(e) => setVolume(Number(e.target.value))}
+                  disabled={!isSoundOn}
+                  className="w-full h-full range-track range-thumb"
+                />
+              </div>
+              <button
+                className="w-fit h-fit p-1 px-3 bg-slate-800 border-2 border-slate-700 rounded-md"
+                onClick={() => {
+                  setVolume(Math.min(volume + 1, 100));
+                }}
+              >
+                <p className="text-slate-400 text-2xl">+</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-10 px-5 fex flex-col items-center justify-center w-full">
+        <Button
+          className=""
+          onClick={() => {
+            setIsOpen(false);
+          }}
+        >
+          back
+        </Button>
+      </div>
+      {isResetPopupOpen && (
+        <div className="absolute inset-0 bg-red-950/50">
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover"></div>
+          <div className="absolute top-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover rotate-90"></div>
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover rotate-180"></div>
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover -rotate-90"></div>
+          <div className=" bg-black select-none pointer-events-none absolute top-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
+          <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
+          <div className="absolute inset-0 bg-[url(/warning.svg)] bg-center bg-no-repeat bg-contain">
+            <p className="poppins text-2xl custom-text-border absolute top-1/2 w-full -translate-y-1/2 text-center">
+              {">> ARE YOU SHURE <<"}
+            </p>
+          </div>
+          <div className=" w-full absolute bottom-20 h-fit flex justify-center items-center">
+            <Button size="sm" onClick={() => setIsResetPopupOpen(false)}>
+              {"< No/Cancel"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                removeUserData();
+                resetLevelsDone();
+                setIsResetPopupOpen(false);
+              }}
+            >
+              {"Yes/Reset >"}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default SettingsMenu;
+
+const BooleanSelection = ({
+  isOn,
+  children,
+}: {
+  isOn: boolean;
+  children: ReactNode;
+}) => {
+  if (isOn) {
+    return (
+      <button className="w-fit h-fit p-2 px-3 bg-yellow-950 border-2 border-yellow-700 rounded-md">
+        <p>{children}</p>
+      </button>
+    );
+  } else {
+    return (
+      <button className="w-fit h-fit p-2 px-3 bg-slate-800 border-2 border-slate-700 rounded-md">
+        <p>{children}</p>
+      </button>
+    );
+  }
+};

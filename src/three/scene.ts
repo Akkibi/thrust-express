@@ -30,7 +30,6 @@ export class SceneManager {
   private particleSystemManager: ParticleSystemManager;
   private postProcessing: THREE.PostProcessing;
   private colorShift: THREE.UniformNode<number>;
-  private isPostProcessingEnabled: boolean;
 
   public constructor(canvas: HTMLDivElement) {
     SceneManager.instance = this;
@@ -69,8 +68,6 @@ export class SceneManager {
     this.env = Environement.getInstance(this.scene, this.physicsEngine);
 
     window.addEventListener("resize", this.resize.bind(this));
-
-    this.isPostProcessingEnabled = true;
 
     this.renderer = new THREE.WebGPURenderer({ antialias: false });
 
@@ -146,15 +143,7 @@ export class SceneManager {
       "update-chromatic-aberration",
       this.updateChromaticAberration.bind(this),
     );
-    eventEmitter.on(
-      "toggle-post-processing",
-      this.togglePostProcessing.bind(this),
-    );
     gsap.ticker.add((time, deltatime) => this.animate(time, deltatime));
-  }
-
-  private togglePostProcessing(value: boolean) {
-    this.isPostProcessingEnabled = value;
   }
 
   private updateChromaticAberration(value: number) {
@@ -242,7 +231,7 @@ export class SceneManager {
 
     this.particleSystemManager.update(deltatime);
 
-    if (this.isPostProcessingEnabled) {
+    if (useStore.getState().isPostProcessingOn) {
       this.postProcessing.render();
     } else {
       this.renderer.render(this.scene, this.camera.getCamera());
