@@ -71,34 +71,25 @@ h1 {
 .custom-light-border-inset {
     box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.15),inset 5px 5px 10px rgba(0, 0,0, 0.5);
 }
-
-/* TRACK */
-input[type="range"].range-track::-webkit-slider-runnable-track {
-  background-color: rgb(30 41 59); /* slate-800 */
-  height: 0.4rem;
-  border-radius: 4px;
-}
-input[type="range"].range-track::-moz-range-track {
-  background-color: rgb(30 41 59);
-  height: 0.4rem;
-  border-radius: 4px;
+input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  width: 100%; /* Specific width is required for Firefox. */
+  background: transparent; /* Otherwise white in Chrome */
 }
 
-/* THUMB — rectangle (2px x 10px) */
-input[type="range"].range-thumb::-webkit-slider-thumb {
-    width: 0.5rem;
-  height: 1.5rem;
-  background-color: white;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  margin-top: -1px; /* visually centers thumb on 8px track */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
 }
-input[type="range"].range-thumb::-moz-range-thumb {
-    width: 0.5rem;
-  height: 1.5rem;
-  background-color: white;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
+
+input[type=range]:focus {
+  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+
+/*firefow thumb*/
+input[type=range]::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: transparent; /* Green background */
+  border: transparent;
+  cursor: pointer; /* Cursor on hover */
 }

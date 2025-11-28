@@ -62,8 +62,8 @@ const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
               </BooleanSelection>
             </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <p className="mx-auto w-fit text-center">Sound</p>
+          <div className="flex flex-col gap-2 w-full">
+            <p className="mx-auto w-fit text-center text-slate-400">Sound</p>
             <div
               className="flex flex-row gap-1 justify-center"
               onClick={() => {
@@ -75,7 +75,7 @@ const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
             </div>
             <div
               className={cn(
-                "flex flex-row gap-1 justify-center px-4",
+                "flex flex-row gap-2 justify-center px-4 w-full",
                 isSoundOn ? "opacity-100" : "opacity-50",
               )}
             >
@@ -87,7 +87,14 @@ const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
               >
                 <p className="text-slate-400 text-2xl">-</p>
               </button>
-              <div className="w-full">
+              <div className="w-full relative">
+                <div className="absolute w-full h-2 bg-slate-800 top-1/2 -translate-y-1/2 rounded-xs select-none pointer-events-none"></div>
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-2/3 bg-slate-300 rounded-sm"
+                  style={{
+                    left: `${volume}%`,
+                  }}
+                ></div>
                 <input
                   type="range"
                   min={0}
@@ -133,19 +140,18 @@ const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
               {">> ARE YOU SHURE <<"}
             </p>
           </div>
-          <div className=" w-full absolute bottom-20 h-fit flex justify-center items-center">
-            <Button size="sm" onClick={() => setIsResetPopupOpen(false)}>
-              {"< No/Cancel"}
+          <div className=" w-full absolute bottom-20 h-fit flex justify-around items-center">
+            <Button onClick={() => setIsResetPopupOpen(false)}>
+              {"Cancel"}
             </Button>
             <Button
-              size="sm"
               onClick={() => {
                 removeUserData();
                 resetLevelsDone();
                 setIsResetPopupOpen(false);
               }}
             >
-              {"Yes/Reset >"}
+              {"Reset"}
             </Button>
           </div>
         </div>
