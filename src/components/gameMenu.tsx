@@ -40,10 +40,18 @@ const GameMenu = ({
       ></video>
       <div className=" bg-black select-none pointer-events-none absolute top-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
       <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
+      <a
+        href="https://github.com/Akkibi"
+        className="text-slate-500 visited:text-slate-700 absolute bottom-2 underline text-xs font-thin left-1/2 -translate-x-1/2 w-fit"
+      >
+        Created by Akira Valade
+      </a>
       <div
-        className="bg-[url(/logo.webp)] bg-contain bg-center bg-no-repeat w-full max-w-96 aspect-video relative
-        ref={sectionTopRef}"
+        className="bg-[url(/logo.webp)] bg-contain bg-center bg-no-repeat w-full max-w-96 aspect-video relative"
         ref={sectionTopRef}
+        style={{
+          filter: "drop-shadow(4px 4px 0px #cf8500)",
+        }}
       ></div>
       <div className="h-full relative">
         {/*<svg

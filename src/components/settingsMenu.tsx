@@ -9,6 +9,16 @@ interface ISettingsType {
   setIsOpen: (isOpen: boolean) => void;
 }
 
+interface DocumentElement {
+  requestFullscreen: () => void;
+  webkitRequestFullscreen: () => void;
+  mozRequestFullscreen: () => void;
+}
+
+interface Document {
+  webkitFullscreenElement: Element | null;
+}
+
 const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
   const [isResetPopupOpen, setIsResetPopupOpen] = useState(false);
   const levelsDone = userDataStore((state) => state.levelsDone);
@@ -19,11 +29,13 @@ const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
     (state) => state.setIsPostProcessingOn,
   );
   const [volume, setVolume] = useState(50); // 0–100
+  const isFullscreen = useStore((state) => state.isFullscreen);
+  const setIsFullscreen = useStore((state) => state.setIsFullscreen);
 
   if (!isOpen) return <></>;
 
   return (
-    <div className="absolute inset-0 z-40 bg-slate-950/80 flex flex-col justify-center">
+    <section className="absolute inset-0 z-40 bg-slate-950/80 flex flex-col justify-center">
       <div className=" bg-black select-none pointer-events-none absolute top-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
       <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
       <div className="relative w-full h-fit flex flex-col">
@@ -125,11 +137,40 @@ const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
                   </button>
                 </div>
               </div>
+              <div className="flex flex-col gap-2">
+                <p className="mx-auto w-fit text-center text-slate-400">
+                  Fullscreen
+                </p>
+                <div
+                  className="flex flex-row gap-1 justify-center"
+                  onClick={() => {
+                    // request fullscreen
+                    setIsFullscreen(!isFullscreen);
+                    const doc = document as globalThis.Document & Document;
+                    if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+                      document.exitFullscreen();
+                      return;
+                    }
+                    const el = doc.documentElement as HTMLElement &
+                      DocumentElement;
+                    if (el.requestFullscreen) {
+                      el.requestFullscreen();
+                    } else if (el.webkitRequestFullscreen) {
+                      el.webkitRequestFullscreen();
+                    } else if (el.mozRequestFullscreen) {
+                      el.mozRequestFullscreen();
+                    }
+                  }}
+                >
+                  <BooleanSelection isOn={isFullscreen}>On</BooleanSelection>
+                  <BooleanSelection isOn={!isFullscreen}>Off</BooleanSelection>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="mt-10 px-5 fex flex-col items-center justify-center w-full">
+      <div className="mt-10 px-5 flex flex-row items-center w-full relative z-10 justify-around">
         <Button
           className=""
           onClick={() => {
@@ -138,37 +179,45 @@ const SettingsMenu = ({ isOpen, setIsOpen }: ISettingsType): ReactNode => {
         >
           back
         </Button>
+        <a
+          className="text-yellow-400 visited:text-yellow-700 text-xs h-10 relative"
+          href="https://github.com/Akkibi/thrust-express"
+        >
+          <p className="h-10 leading-10">Visit GitHub repo</p>
+        </a>
       </div>
       {isResetPopupOpen && (
-        <div className="absolute inset-0 bg-red-950/50">
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover"></div>
-          <div className="absolute top-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover rotate-90"></div>
-          <div className="absolute top-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover rotate-180"></div>
-          <div className="absolute bottom-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover -rotate-90"></div>
-          <div className=" bg-black select-none pointer-events-none absolute top-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
-          <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
-          <div className="absolute inset-0 bg-[url(/warning.svg)] bg-center bg-no-repeat bg-contain">
-            <p className="poppins text-2xl custom-text-border absolute top-1/2 w-full -translate-y-1/2 text-center">
-              {">> ARE YOU SHURE <<"}
-            </p>
-          </div>
-          <div className=" w-full absolute bottom-20 h-fit flex justify-around items-center">
-            <Button onClick={() => setIsResetPopupOpen(false)}>
-              {"Cancel"}
-            </Button>
-            <Button
-              onClick={() => {
-                removeUserData();
-                resetLevelsDone();
-                setIsResetPopupOpen(false);
-              }}
-            >
-              {"Reset"}
-            </Button>
+        <div className="absolute inset-0 bg-black/50 z-50">
+          <div className="absolute inset-0 bg-red-950/50">
+            <div className="absolute bottom-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover"></div>
+            <div className="absolute top-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover rotate-90"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover rotate-180"></div>
+            <div className="absolute bottom-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover -rotate-90"></div>
+            <div className=" bg-black select-none pointer-events-none absolute top-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
+            <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
+            <div className="absolute inset-0 bg-[url(/warning.svg)] bg-center bg-no-repeat bg-contain">
+              <p className="poppins text-2xl custom-text-border absolute top-1/2 w-full -translate-y-1/2 text-center">
+                {">> ARE YOU SHURE <<"}
+              </p>
+            </div>
+            <div className=" w-full absolute bottom-20 h-fit flex justify-around items-center">
+              <Button onClick={() => setIsResetPopupOpen(false)}>
+                {"Cancel"}
+              </Button>
+              <Button
+                onClick={() => {
+                  removeUserData();
+                  resetLevelsDone();
+                  setIsResetPopupOpen(false);
+                }}
+              >
+                {"Reset"}
+              </Button>
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 };
 

@@ -21,6 +21,8 @@ type Store = {
   setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) => void;
   setIsPaused: (isPaused: boolean) => void;
   setIsPostProcessingOn: (isPostProcessingOn: boolean) => void;
+  setIsFullscreen: (isFullscreen: boolean) => void;
+  isFullscreen: boolean;
 };
 
 export const globals = {
@@ -40,6 +42,8 @@ export const useStore = create<Store>((set) => ({
   health: 100,
   lastLevel: null,
   lastLevelScore: null,
+  isFullscreen: false,
+  setIsFullscreen: (isFullscreen: boolean) => set({ isFullscreen }),
   setIsPostProcessingOn: (isPostProcessingOn: boolean) =>
     set({ isPostProcessingOn }),
   setIsPaused: (isPaused: boolean) => set({ isPaused }),
