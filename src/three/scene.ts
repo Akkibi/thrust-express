@@ -13,6 +13,7 @@ import { Cheats } from "../utils/cheats";
 import { eventEmitter } from "../utils/eventEmitter";
 import levels, { type LevelType } from "../levels";
 import { ParticleSystemManager } from "./particlesSystemManager";
+import { ArrowTarget } from "./arrowTarget";
 
 export class SceneManager {
   private cheats: Cheats;
@@ -30,6 +31,7 @@ export class SceneManager {
   private particleSystemManager: ParticleSystemManager;
   private postProcessing: THREE.PostProcessing;
   private colorShift: THREE.UniformNode<number>;
+  private arrowTarget: ArrowTarget;
 
   public constructor(canvas: HTMLDivElement) {
     SceneManager.instance = this;
@@ -44,12 +46,11 @@ export class SceneManager {
     this.stats.dom.style.top = "100px";
 
     this.joystickHandler = JoystickHandler.getInstance();
-
     this.physicsEngine = PhysicsEngine.getInstance();
     this.scene = new THREE.Scene();
 
+    this.arrowTarget = new ArrowTarget();
     this.player = Player.getInstance();
-    this.player.setScene(this.scene);
     this.collisionWatcher = CollisionWatcher.getInstance(
       this.physicsEngine.engine,
     );
@@ -224,6 +225,7 @@ export class SceneManager {
       this.physicsEngine.update(deltatime);
 
       this.player.update(time, deltatime);
+      this.arrowTarget.update();
       this.camera.update(deltatime);
 
       this.collisionWatcher.update();

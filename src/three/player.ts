@@ -7,6 +7,7 @@ import { StartEnd } from "./startEnd";
 import gsap from "gsap";
 import { ParticleSystemManager } from "./particlesSystemManager";
 import { lerp } from "three/src/math/MathUtils.js";
+import { SceneManager } from "./scene";
 
 const DEFAULT_FLAMES_SCALE = new THREE.Vector3(0.3, 0.4, 0.3);
 const DEFAULT_SCALE = new THREE.Vector3(0.1, 0.1, 0.1);
@@ -14,7 +15,6 @@ const DEFAULT_SCALE = new THREE.Vector3(0.1, 0.1, 0.1);
 export class Player {
   private static _instance: Player;
   private instanceGroup: THREE.Group;
-  private scene: THREE.Scene | null;
   private body: Matter.Body | null;
   private flames: THREE.Object3D[] = [];
   private package: THREE.Object3D[] = [];
@@ -27,14 +27,8 @@ export class Player {
     return Player._instance;
   }
 
-  public setScene(scene: THREE.Scene) {
-    this.scene = scene;
-    this.scene.add(this.instanceGroup);
-  }
-
   private constructor() {
     this.body = null;
-    this.scene = null;
     // const width = body.bounds.max.x - body.bounds.min.x;
     // const height = body.bounds.max.y - body.bounds.min.y;
     this.instanceGroup = new THREE.Group();
@@ -56,6 +50,7 @@ export class Player {
     );
 
     this.instanceGroup.scale.copy(DEFAULT_SCALE);
+    SceneManager.getInstance().scene.add(this.instanceGroup);
   }
 
   public init(body: Matter.Body): void {

@@ -30,7 +30,7 @@ export class InstanceObjectManager {
 
   private constructor() {
     const textureLoader = new THREE.TextureLoader();
-    const loadedTexture = textureLoader.load("models/textures/walls.png");
+    const loadedTexture = textureLoader.load("models/textures/walls2.png");
     loadedTexture.wrapS = THREE.RepeatWrapping;
     loadedTexture.wrapT = THREE.RepeatWrapping;
     loadedTexture.colorSpace = THREE.SRGBColorSpace;
@@ -62,7 +62,7 @@ export class InstanceObjectManager {
 
     const topMask = step(linearGradient.sub(0.02), 0.9999).oneMinus();
 
-    const mask = whiteMask.add(topMask.mul(1));
+    const mask = whiteMask.add(topMask);
 
     // Create vertical gradient
     const gradient = mix(bottomColor, mapNode, mask);
@@ -148,8 +148,8 @@ export class InstanceObjectManager {
 
     this.dummy.scale.set(scale.x, scale.y, scale.z);
 
-    const textureScaleX = scale.x * 0.25;
-    const textureScaleY = scale.z * 0.25;
+    const textureScaleX = scale.x * 0.25 * 0.5;
+    const textureScaleY = scale.z * 0.25 * 0.5;
 
     this.setInstanceTextureScale(
       index,
