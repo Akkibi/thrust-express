@@ -14,6 +14,7 @@ const PauseMenu = ({
   setLevelSelectorOpen,
 }: IPauseMenu): ReactNode => {
   const setIsPaused = useStore((state) => state.setIsPaused);
+  const lastLevel = useStore((state) => state.lastLevel);
 
   if (!isOpen) return <></>;
   return (
@@ -23,6 +24,7 @@ const PauseMenu = ({
       <h2 className=" text-4xl scale-200 absolute top-20 font-bold poppins">
         Pause
       </h2>
+      <p className="text-xl mb-10">{lastLevel?.name}</p>
       <button
         type="button"
         className="w-30 h-30 relative border-4 border-white rounded-xl"

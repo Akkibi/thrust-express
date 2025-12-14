@@ -35,11 +35,9 @@ const EndTitle = ({
   const star3ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (lastLevel) {
-      const best = findBestValues(levelsDone, lastLevel.name);
-
-      setBestValues(best);
-    }
+    if (!lastLevel) return;
+    const best = findBestValues(levelsDone, lastLevel.name);
+    setBestValues(best);
   }, [lastLevel, levelsDone]);
 
   useGSAP(
@@ -51,7 +49,8 @@ const EndTitle = ({
       const star1 = star1ref.current;
       const star2 = star2ref.current;
       const star3 = star3ref.current;
-      if (!sectionTop || !sectionBottom || !container) return;
+      if (!sectionTop || !sectionBottom || !container || bestValues === null)
+        return;
 
       gsap.set(star1, { opacity: 0 });
       gsap.set(star2, { opacity: 0 });
@@ -128,7 +127,7 @@ const EndTitle = ({
     },
     {
       scope: containerRef,
-      dependencies: [sectionBottomRef, sectionTopRef, isOpen],
+      dependencies: [sectionBottomRef, sectionTopRef, isOpen, bestValues],
     },
   );
 
@@ -157,6 +156,7 @@ const EndTitle = ({
           {lastLevelScore ? (
             <>
               <div className="text-base font-bold text-yellow-500 relative">
+                <span className="text-yellow-300">{lastLevel?.name}</span>{" "}
                 Package Delivered !
               </div>
             </>

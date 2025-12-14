@@ -24,7 +24,7 @@ export class ArrowTarget {
           child.rotation.y = Math.PI;
           child.position.y = 0.45;
           child.material = new THREE.MeshBasicMaterial({
-            color: 0xffff00,
+            color: 0xffcc00,
             wireframe: false,
             side: THREE.DoubleSide,
             opacity: 0.05,

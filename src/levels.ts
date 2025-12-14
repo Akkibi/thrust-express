@@ -25,6 +25,14 @@ const levels: LevelType[] = [
     color: [0.5, 1, 1],
   },
   {
+    name: "Level 1 bis",
+    image: "mapt.png",
+    map: "/mapData/mapt.json",
+    isDone: false,
+    best: { score: 0, time: 0 },
+    color: [0.8, 1, 0.1],
+  },
+  {
     name: "Level 2",
     image: "map3.png",
     map: "/mapData/map3.json",
@@ -39,6 +47,14 @@ const levels: LevelType[] = [
     isDone: false,
     best: { score: 0, time: 0 },
     color: [1, 1, 0.5],
+  },
+  {
+    name: "Level 3 bis",
+    image: "map3bis.png",
+    map: "/mapData/map3bis.json",
+    isDone: false,
+    best: { score: 0, time: 0 },
+    color: [0.2, 0.2, 1],
   },
   {
     name: "Level 4",

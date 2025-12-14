@@ -34,13 +34,13 @@ const BoostButton = (): ReactNode => {
     thrustButton.addEventListener("touchcancel", handleTouchEnd);
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "t" || e.key === "T") {
+      if (e.key === " ") {
         setIsThrusting(true);
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "t" || e.key === "T") {
+      if (e.key === " ") {
         setIsThrusting(false);
       }
     };

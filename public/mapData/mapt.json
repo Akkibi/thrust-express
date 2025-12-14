@@ -1,0 +1,40 @@
+{
+  "size": {
+    "x": 19,
+    "y": 14
+  },
+  "optimizedWalls": [
+    {
+      "position": {
+        "x": 9.0,
+        "y": 4.0
+      },
+      "scale": {
+        "x": 7,
+        "y": 1
+      }
+    },
+    {
+      "position": {
+        "x": 9.0,
+        "y": 9.0
+      },
+      "scale": {
+        "x": 3,
+        "y": 9
+      }
+    }
+  ],
+  "player": {
+    "position": {
+      "x": 6,
+      "y": 12
+    }
+  },
+  "goal": {
+    "position": {
+      "x": 12,
+      "y": 12
+    }
+  }
+}
