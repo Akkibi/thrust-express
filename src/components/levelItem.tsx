@@ -7,7 +7,6 @@ import { findBestValues, orderBestValues } from "../utils/findBestLevel";
 import { userDataStore } from "../store/userDataStore";
 import type { ILevelScore } from "../types/types";
 import levels from "../levels";
-import { div } from "three/src/nodes/TSL.js";
 
 export interface LevelItemTypes {
   level: LevelType;
@@ -43,7 +42,9 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
     <div
       className={cn(
         "w-full p-2 flex flex-none flex-col relative rounded-xl overflow-clip custom-light-border",
-        isLastValidated ? "bg-slate-600" : "bg-slate-600/75",
+        isLastValidated
+          ? "bg-linear-to-t from-slate-700 to-slate-600"
+          : "bg-slate-600/75",
       )}
       style={{ opacity: isLastValidated ? 1 : 0.75 }}
     >
@@ -103,7 +104,7 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
             <div className="absolute inset-1 bg-red-950 rounded-full custom-inner-shadow"></div>
           )}
         </div>
-        <div className="w-18 h-10 relative flex-none bg-slate-950 rounded-full custom-light-border">
+        <div className="w-18 h-10 relative flex-none bg-linear-to-t from-slate-950 to-slate-900 rounded-full custom-light-border">
           {(bestValues?.health ?? 0 > 0) ? (
             <div className="absolute top-1/2 -translate-y-1/2 h-8 left-1 w-8 bg-[url(/icons/full-star.svg)] bg-center scale-75 bg-contain bg-no-repeat"></div>
           ) : (

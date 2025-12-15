@@ -46,7 +46,7 @@ const LevelSelector = ({
 
   if (!isOpen) return <></>;
   return (
-    <div className="bg-slate-800 absolute z-50 inset-0 flex flex-col items-center justify-center overflow-hidden p-3">
+    <div className="bg-linear-to-t from-slate-900 to-slate-800 absolute z-50 inset-0 flex flex-col items-center justify-center overflow-hidden p-3">
       <div className="w-full px-5 py-2 mb-3 bg-slate-950 rounded-3xl custom-light-border-inset flex flex-row relative">
         <p className="w-full text-xl font-black custom-text-border text-center">
           LEVELS
@@ -72,7 +72,7 @@ const LevelSelector = ({
           </svg>
         </button>
       </div>
-      <div className="flex flex-col w-full h-full p-3 bg-slate-950 rounded-3xl overflow-y-scroll custom-light-border-inset perspective-midrange">
+      <div className="flex flex-col w-full h-full p-3 bg-linear-to-t from-black to-slate-950 rounded-3xl overflow-y-scroll custom-light-border-inset perspective-midrange">
         {levels.map((level, index) => (
           <div
             key={index}

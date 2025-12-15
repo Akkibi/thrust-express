@@ -27,7 +27,7 @@ const Button = ({
       disabled={isDisabled}
     >
       <div className="absolute inset-0.75 bg-linear-to-t from-yellow-700 to-yellow-600 rounded-full">
-        <div className="absolute inset-1 bg-slate-950 rounded-full"></div>
+        <div className="absolute inset-1 bg-linear-to-t from-slate-950 to-slate-900 rounded-full border-2 border-slate-950"></div>
       </div>
       <span className="relative italic font-black uppercase">{children}</span>
     </button>
