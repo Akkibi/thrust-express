@@ -7,6 +7,7 @@ import { findBestValues, orderBestValues } from "../utils/findBestLevel";
 import { userDataStore } from "../store/userDataStore";
 import type { ILevelScore } from "../types/types";
 import levels from "../levels";
+import { div } from "three/src/nodes/TSL.js";
 
 export interface LevelItemTypes {
   level: LevelType;
@@ -66,24 +67,30 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
             {level.name}
           </p>
           {bestValues && (
-            <div className="flex flex-col text-left p-2 bg-slate-950 border-2 border-black rounded-sm h-fit max-h-full overflow-clip">
-              <p className="text-xs opacity-50">Best :</p>
-              {orderedBestValues && orderedBestValues.length > 0 && (
-                <>
-                  {orderedBestValues.map((best, index) => (
-                    <p
-                      className={cn(
-                        "text-xs font-bold",
-                        index == 0 && "text-sm",
-                      )}
-                      key={index}
-                      style={{ opacity: 1 / (index + 0.01) }}
-                    >
-                      {(best.time / 1000).toFixed(2)}s
-                    </p>
-                  ))}
-                </>
-              )}
+            <div className="p-1 bg-slate-950 rounded-md custom-light-border-inset max-h-full flex flex-col">
+              <div className="flex flex-col text-left bg-yellow-950 rounded-sm h-full overflow-clip custom-inner-shadow relative font-mono">
+                <div className="w-full h-full bg-yellow-600 absolute inset-0 scale-60 opacity-50 blur-2xl"></div>
+                <p className="text-xs opacity-50 text-yellow-500 relative z-10 pt-1 px-2 font-bold">
+                  Top:
+                </p>
+                {orderedBestValues && orderedBestValues.length > 0 && (
+                  <>
+                    {orderedBestValues.map((best, index) => (
+                      <p
+                        className={cn(
+                          "text-xs font-bold text-yellow-600 relative z-10 px-2",
+                          index == 0 &&
+                            "text-sm bg-yellow-600 text-yellow-950 p-0.5 px-2",
+                        )}
+                        key={index}
+                        style={{ opacity: 1 / (index + 0.01) }}
+                      >
+                        {(best.time / 1000).toFixed(2)}s
+                      </p>
+                    ))}
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>
