@@ -18,7 +18,7 @@ const ThreeManager = (): ReactNode => {
   }, []);
 
   return (
-    <>
+    <div className="absolute inset-0 z-0">
       <div ref={canvasRef} id="threeContainer"></div>
       <div className="absolute bottom-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover"></div>
       <div className="absolute top-0 left-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover rotate-90"></div>
@@ -26,7 +26,7 @@ const ThreeManager = (): ReactNode => {
       <div className="absolute bottom-0 right-0 w-20 h-20 bg-[url(/corner.svg)] bg-cover -rotate-90"></div>
       <JoyStick />
       <BoostButton />
-    </>
+    </div>
   );
 };
 

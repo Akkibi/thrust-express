@@ -7,21 +7,35 @@ const JoyStick = (): ReactNode => {
   const isCutscene = useStore((state) => state.isCutscene);
   const [isTouchActive, setIsTouchActive] = useState(false);
   const joystickContainerRef = useRef<HTMLDivElement>(null);
+  const joystickZoneRef = useRef<HTMLDivElement>(null);
   const joyStickKnobRef = useRef<HTMLDivElement>(null);
   const joystickRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const joyStickContainer = joystickContainerRef.current;
+    const joystickZone = joystickZoneRef.current;
     const joyStickKnob = joyStickKnobRef.current;
     const joyStick = joystickRef.current;
-    if (!joyStickContainer || !joyStickKnob || !joyStick) return;
+    if (!joyStickContainer || !joyStickKnob || !joyStick || !joystickZone)
+      return;
 
     const joystickHandler = JoystickHandler.getInstance();
 
+    const findTouch = (e: TouchEvent): Touch | null => {
+      let currentTouch = null;
+      const touches = [...e.touches];
+      touches.forEach((touch) => {
+        if (touch.clientX < window.innerWidth * 0.5) {
+          currentTouch = touch;
+        }
+      });
+      return currentTouch;
+    };
+
     const handleTouchStart = (e: TouchEvent) => {
       e.preventDefault();
-      const touch = e.touches[0];
-      if (touch.clientX > window.innerWidth * 0.6) return;
+      const touch = findTouch(e);
+      if (!touch) return;
       setIsTouchActive(true);
       console.log("joystick start");
       const x = touch.clientX - joyStick.offsetLeft;
@@ -38,7 +52,9 @@ const JoyStick = (): ReactNode => {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isTouchActive) return;
-      const touch = e.touches[0];
+      const touch = findTouch(e);
+      if (!touch) return;
+
       joystickHandler.setCurrentPos([touch.clientX, touch.clientY]);
       const { width, height } = joyStick.getBoundingClientRect();
 
@@ -60,35 +76,44 @@ const JoyStick = (): ReactNode => {
       // console.log(x, y);
     };
 
-    joyStickContainer.addEventListener("touchstart", handleTouchStart);
-    joyStickContainer.addEventListener("touchmove", handleTouchMove);
-    joyStickContainer.addEventListener("touchend", handleTouchEnd);
-    joyStickContainer.addEventListener("touchcancel", handleTouchEnd);
+    joystickZone.addEventListener("touchstart", handleTouchStart);
+    joystickZone.addEventListener("touchmove", handleTouchMove);
+    joystickZone.addEventListener("touchend", handleTouchEnd);
+    joystickZone.addEventListener("touchcancel", handleTouchEnd);
 
     return () => {
-      joyStickContainer.removeEventListener("touchstart", handleTouchStart);
-      joyStickContainer.removeEventListener("touchmove", handleTouchMove);
-      joyStickContainer.removeEventListener("touchend", handleTouchEnd);
-      joyStickContainer.removeEventListener("touchcancel", handleTouchEnd);
+      joystickZone.removeEventListener("touchstart", handleTouchStart);
+      joystickZone.removeEventListener("touchmove", handleTouchMove);
+      joystickZone.removeEventListener("touchend", handleTouchEnd);
+      joystickZone.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [isTouchActive]);
 
   return (
-    <div
-      className={cn("absolute inset-0", isCutscene ? "hidden" : "block")}
-      ref={joystickContainerRef}
-    >
+    <>
       <div
-        className="absolute w-40 h-40 -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-full border-4 border-slate-700 select-none pointer-events-none"
-        ref={joystickRef}
-        style={{ opacity: isTouchActive ? 0.5 : 0.05 }}
+        ref={joystickZoneRef}
+        className={cn(`absolute top-0 bottom-0 left-0 w-1/2 select-none`)}
+      ></div>
+      <div
+        className={cn(
+          "absolute inset-0 select-none pointer-events-none",
+          isCutscene ? "opacity-50" : "opacity-100",
+        )}
+        ref={joystickContainerRef}
       >
         <div
-          className="absolute w-20 h-20 -translate-x-1/2 -translate-y-1/2 bg-slate-400 rounded-full border-4 border-slate-300"
-          ref={joyStickKnobRef}
-        ></div>
+          className="absolute w-40 h-40 -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-full border-4 border-slate-700 select-none pointer-events-none"
+          ref={joystickRef}
+          style={{ opacity: isTouchActive ? 0.5 : 0.05 }}
+        >
+          <div
+            className="absolute w-20 h-20 -translate-x-1/2 -translate-y-1/2 bg-slate-400 rounded-full border-4 border-slate-300"
+            ref={joyStickKnobRef}
+          ></div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
