@@ -25,7 +25,11 @@ const JoyStick = (): ReactNode => {
       let currentTouch = null;
       const touches = [...e.touches];
       touches.forEach((touch) => {
-        if (touch.clientX < window.innerWidth * 0.5) {
+        // console.log(touch.target, joystickZone);
+        if (
+          // touch.clientX < window.innerWidth * 0.5 &&
+          touch.target === joystickZone
+        ) {
           currentTouch = touch;
         }
       });
