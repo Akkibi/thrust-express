@@ -47,3 +47,17 @@ export const orderBestValues = (
     return b.health - a.health;
   });
 };
+
+export const getMostRecentValues = (
+  levelsDone: ILevelScore[],
+  levelName: string,
+): ILevelScore | null => {
+  if (levelsDone.length <= 0) return null;
+  const scores = levelsDone.filter(
+    (currentLevel) => currentLevel.levelName === levelName,
+  );
+
+  if (scores.length <= 0) return null;
+
+  return scores[scores.length - 1];
+};

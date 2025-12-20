@@ -3,7 +3,11 @@ import type { LevelType } from "../levels";
 import { cn } from "../utils/cn";
 import { eventEmitter } from "../utils/eventEmitter";
 import Button from "./button";
-import { findBestValues, orderBestValues } from "../utils/findBestLevel";
+import {
+  findBestValues,
+  getMostRecentValues,
+  orderBestValues,
+} from "../utils/findBestLevel";
 import { userDataStore } from "../store/userDataStore";
 import type { ILevelScore } from "../types/types";
 import levels from "../levels";
@@ -16,6 +20,7 @@ export interface LevelItemTypes {
 const LevelItem = ({ level, action }: LevelItemTypes) => {
   const levelsDone = userDataStore((state) => state.levelsDone);
   const [bestValues, setBestValues] = useState<ILevelScore | null>(null);
+  const [lastValues, setLastValues] = useState<ILevelScore | null>(null);
   const [isLastValidated, setIsLastValidated] = useState(false);
 
   const [orderedBestValues, setOrderedBestValues] = useState<ILevelScore[]>([]);
@@ -24,6 +29,8 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
     setBestValues(best);
     const ordered = orderBestValues(levelsDone, level.name);
     setOrderedBestValues(ordered);
+    const last = getMostRecentValues(levelsDone, level.name);
+    setLastValues(last);
 
     if (level.name == "Tutorial") {
       setIsLastValidated(true);
@@ -86,6 +93,14 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
                         key={index}
                         style={{ opacity: 1 / (index + 0.01) }}
                       >
+                        {lastValues == best && (
+                          <span
+                            className={cn(
+                              "absolute left-0 w-2 h-2 top-1/2 -translate-y-1/2 -translate-x-1/2 rotate-45",
+                              index == 0 ? "bg-yellow-950" : "bg-yellow-600",
+                            )}
+                          ></span>
+                        )}
                         {(best.time / 1000).toFixed(2)}s
                       </p>
                     ))}

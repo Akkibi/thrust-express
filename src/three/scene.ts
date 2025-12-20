@@ -19,7 +19,6 @@ export class SceneManager {
   private cheats: Cheats;
   private static instance: SceneManager;
   public canvas: HTMLDivElement | null;
-  public scene: THREE.Scene;
   private joystickHandler: JoystickHandler;
   private renderer: THREE.WebGPURenderer;
   private camera: CameraManager;
@@ -32,6 +31,8 @@ export class SceneManager {
   private postProcessing: THREE.PostProcessing;
   private colorShift: THREE.UniformNode<number>;
   private arrowTarget: ArrowTarget;
+  private scenes: { [key: string]: THREE.Scene };
+  private currentScene: string;
 
   public constructor(canvas: HTMLDivElement) {
     SceneManager.instance = this;
@@ -47,7 +48,11 @@ export class SceneManager {
 
     this.joystickHandler = JoystickHandler.getInstance();
     this.physicsEngine = PhysicsEngine.getInstance();
-    this.scene = new THREE.Scene();
+    this.scenes = {};
+    this.scenes.main = new THREE.Scene();
+    this.scenes.menu = new THREE.Scene();
+
+    this.currentScene = "main";
 
     this.arrowTarget = new ArrowTarget();
     this.player = Player.getInstance();
@@ -56,17 +61,17 @@ export class SceneManager {
     );
 
     this.particleSystemManager = ParticleSystemManager.getInstance();
-    this.particleSystemManager.setScene(this.scene);
+    this.particleSystemManager.setScene(this.scenes.main);
     this.particleSystemManager.setTexture("/point.png");
 
     this.canvas = canvas;
-    this.scene.environment = null;
-    this.scene.background = new THREE.Color(0x000000);
+    this.scenes.main.environment = null;
+    this.scenes.main.background = new THREE.Color(0x000000);
     this.camera = CameraManager.getInstance();
     // this.scene.background = new THREE.Color(0x16161d);
 
-    this.camera.setScene(this.scene);
-    this.env = Environement.getInstance(this.scene, this.physicsEngine);
+    this.camera.setScene(this.scenes.main);
+    this.env = Environement.getInstance(this.scenes.main, this.physicsEngine);
 
     window.addEventListener("resize", this.resize.bind(this));
 
@@ -85,7 +90,7 @@ export class SceneManager {
     // --- Post Processing ---
     this.postProcessing = new THREE.PostProcessing(this.renderer);
 
-    const scenePass = pass(this.scene, this.camera.getCamera());
+    const scenePass = pass(this.scenes.main, this.camera.getCamera());
     const scenePassTexture = scenePass.getTextureNode();
 
     this.colorShift = uniform(1);
@@ -146,6 +151,10 @@ export class SceneManager {
     );
     gsap.ticker.add((time, deltatime) => this.animate(time, deltatime));
   }
+
+  public setScene = (name: string) => {
+    this.currentScene = name;
+  };
 
   private updateChromaticAberration(value: number) {
     this.colorShift.value = value;
@@ -236,12 +245,16 @@ export class SceneManager {
     if (useStore.getState().isPostProcessingOn) {
       this.postProcessing.render();
     } else {
-      this.renderer.render(this.scene, this.camera.getCamera());
+      this.renderer.render(
+        this.scenes[this.currentScene],
+        this.camera.getCamera(),
+      );
     }
     this.stats.end();
   }
 
-  public getScene(): THREE.Scene {
-    return this.scene;
+  public getScene(name?: string): THREE.Scene {
+    if (!name) return this.scenes[this.currentScene];
+    return this.scenes[name] ?? this.scenes.main;
   }
 }

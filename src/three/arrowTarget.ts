@@ -36,7 +36,7 @@ export class ArrowTarget {
 
     this.meshGroup.scale.multiplyScalar(2);
 
-    SceneManager.getInstance().scene.add(this.meshGroup);
+    SceneManager.getInstance().getScene("main").add(this.meshGroup);
   }
 
   update() {

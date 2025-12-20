@@ -50,7 +50,7 @@ export class Player {
     );
 
     this.instanceGroup.scale.copy(DEFAULT_SCALE);
-    SceneManager.getInstance().scene.add(this.instanceGroup);
+    SceneManager.getInstance().getScene("main").add(this.instanceGroup);
   }
 
   public init(body: Matter.Body): void {
