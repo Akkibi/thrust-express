@@ -32,8 +32,9 @@ export class Player {
     // const width = body.bounds.max.x - body.bounds.min.x;
     // const height = body.bounds.max.y - body.bounds.min.y;
     this.instanceGroup = new THREE.Group();
+    const groupTranslate = new THREE.Group();
 
-    loadGLTFModel(this.instanceGroup, "/models/ship/spaceship.glb").then(
+    loadGLTFModel(groupTranslate, "/models/ship/spaceship.glb").then(
       (model) => {
         const elemsArray = find3dElements("flame", model);
         this.flames.push(...elemsArray);
@@ -48,6 +49,9 @@ export class Player {
         this.package.push(...parcels);
       },
     );
+
+    groupTranslate.position.copy(new THREE.Vector3(0, 0, 4));
+    this.instanceGroup.add(groupTranslate);
 
     this.instanceGroup.scale.copy(DEFAULT_SCALE);
     SceneManager.getInstance().getScene("main").add(this.instanceGroup);
