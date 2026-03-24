@@ -3,6 +3,7 @@ import { eventEmitter } from "../utils/eventEmitter";
 import Button from "./button";
 import { useGSAP } from "@gsap/react";
 import SettingsMenu from "./settingsMenu";
+import { JumpingLetters } from "./jumpingLetters";
 
 interface GameMenuTypes {
   isOpen: boolean;
@@ -79,7 +80,7 @@ const GameMenu = ({
             setIsOpen(false);
           }}
         >
-          Select level
+          <JumpingLetters text="Select level" />
         </Button>
         <Button
           isDisabled
@@ -88,7 +89,7 @@ const GameMenu = ({
             setIsOpen(false);
           }}
         >
-          Endless mode
+          <JumpingLetters text="Endless mode" />
         </Button>
       </div>
       <div

@@ -4,6 +4,7 @@ import type { IMapData } from "../types/types";
 import { InstanceObjectManager } from "./InstanceObjectManager";
 import type { LevelType } from "../levels";
 import { StartEnd } from "./startEnd";
+import { loadGLTFModel } from "../utils/loadGLTFModel";
 
 const WALLS_WIDTH = 20;
 const WALLS_HEIGHT = 10;
@@ -19,6 +20,8 @@ export class Environement {
   private objectManager: InstanceObjectManager | null;
   private terrainManager: InstanceObjectManager | null;
   private startEnd: StartEnd;
+  private fieldModels: THREE.Group[];
+  private fieldModelRotators: THREE.Group[];
   // private physicsEngine: PhysicsEngine;
 
   private constructor(scene: THREE.Scene, physicsEngine: PhysicsEngine) {
@@ -31,6 +34,8 @@ export class Environement {
     this.scene.add(this.instanceGroup);
     this.goal = new THREE.Group();
     this.environementBlocks = [];
+    this.fieldModels = [];
+    this.fieldModelRotators = [];
     this.startEnd = StartEnd.getInstance();
     this.startEnd.init(this.scene);
   }
@@ -41,6 +46,9 @@ export class Environement {
     objectManager.releaseAll();
     this.scene.remove(objectManager.getMesh());
     this.objectManager = null;
+    this.fieldModels.forEach((m) => this.scene.remove(m));
+    this.fieldModels = [];
+    this.physicsEngine.clearFields();
   };
 
   public unloadEndless = () => {
@@ -164,6 +172,71 @@ export class Environement {
       objectManager.updateColor(rightWall, color);
       this.physicsEngine.addObject(position, scale, 0, false);
     }
+    // generate fields
+    this.fieldModels.forEach((m) => this.scene.remove(m));
+    this.fieldModels = [];
+    this.fieldModelRotators = [];
+
+    const scale = 0.5;
+
+    this.physicsEngine.clearFields();
+
+    this.mapData.repulsionField.forEach((field) => {
+      const group = new THREE.Group();
+      group.scale.multiplyScalar(scale);
+      group.position.set(field.position.x, 0, field.position.y);
+      this.scene.add(group);
+      this.fieldModels.push(group);
+      const modelGroup = new THREE.Group();
+      group.add(modelGroup);
+      this.fieldModelRotators.push(modelGroup);
+      loadGLTFModel(modelGroup, "/models/entities/repulse.glb");
+      this.physicsEngine.addFieldBody(
+        new THREE.Vector3(field.position.x, 0, field.position.y),
+        "repulsion",
+      );
+      const polargrid = new THREE.PolarGridHelper(
+        18,
+        0,
+        4,
+        64,
+        new THREE.Color(0x221177),
+        new THREE.Color(0x221177),
+      );
+      const m = polargrid.material as THREE.Material;
+      m.transparent = true;
+      m.opacity = 0.3;
+      group.add(polargrid);
+    });
+
+    this.mapData.attractionField.forEach((field) => {
+      const group = new THREE.Group();
+      group.scale.multiplyScalar(scale);
+      group.position.set(field.position.x, 0, field.position.y);
+      this.scene.add(group);
+      this.fieldModels.push(group);
+      const modelGroup = new THREE.Group();
+      group.add(modelGroup);
+      this.fieldModelRotators.push(modelGroup);
+      loadGLTFModel(modelGroup, "/models/entities/attract.glb");
+      this.physicsEngine.addFieldBody(
+        new THREE.Vector3(field.position.x, 0, field.position.y),
+        "attraction",
+      );
+      const polargrid = new THREE.PolarGridHelper(
+        18,
+        0,
+        4,
+        64,
+        new THREE.Color(0x550011),
+        new THREE.Color(0x550011),
+      );
+      const m = polargrid.material as THREE.Material;
+      m.transparent = true;
+      m.opacity = 0.25;
+      group.add(polargrid);
+    });
+
     // generate goal
     const goalPosition = this.mapData.goal.position;
     const position = new THREE.Vector3(goalPosition.x, 0, goalPosition.y);
@@ -176,6 +249,13 @@ export class Environement {
       new THREE.Vector3(playerPosition.x, 0, playerPosition.y),
     );
     this.startEnd.setStart(playerPosition);
+  }
+
+  public update(time: number): void {
+    this.fieldModelRotators.forEach((m) => {
+      m.rotation.x = Math.sin(time * 0.2) * 2;
+      m.rotation.y = time * 0.1;
+    });
   }
 
   public loadEndless = () => {

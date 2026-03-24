@@ -136,5 +136,7 @@
       "x": 11,
       "y": 2
     }
-  }
+  },
+  "repulsionField": [],
+  "attractionField": []
 }

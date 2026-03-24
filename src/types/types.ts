@@ -4,6 +4,8 @@ export interface IMapData {
   optimizedWalls: IObjectMap[];
   player: IObjectMap;
   goal: IObjectMap;
+  repulsionField: IObjectMap[];
+  attractionField: IObjectMap[];
 }
 
 export type Vec2 = { x: number; y: number };

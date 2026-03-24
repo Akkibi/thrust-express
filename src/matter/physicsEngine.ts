@@ -27,6 +27,11 @@ export interface vec2 {
 
 const FIXED_STEP_DELTA = 1 / 30;
 
+const FIELD_RANGE = 1000; // matter units (~3 THREE units)
+const FIELD_FORCE = FORCE_SCALE * 5;
+
+type FieldEntry = { x: number; y: number; type: "repulsion" | "attraction" };
+
 export class PhysicsEngine {
   private static _instance: PhysicsEngine;
   public engine: Matter.Engine;
@@ -37,6 +42,7 @@ export class PhysicsEngine {
   public targetRotation: number;
   public isThrusting: boolean = false;
   private acc: number;
+  private fields: FieldEntry[] = [];
 
   private constructor() {
     this.acc = 0;
@@ -134,6 +140,23 @@ export class PhysicsEngine {
     Matter.World.remove(this.engine.world, object);
   }
 
+  public addFieldBody(
+    position: THREE.Vector3,
+    type: "repulsion" | "attraction",
+  ): Matter.Body {
+    const body = this.addCircle(position, 0.5, false, { label: type });
+    this.fields.push({
+      x: body.position.x,
+      y: body.position.y,
+      type,
+    });
+    return body;
+  }
+
+  public clearFields(): void {
+    this.fields = [];
+  }
+
   private rotationSmoother(deltaTime: number) {
     let shortestTargetRotation = this.targetRotation;
 
@@ -173,6 +196,21 @@ export class PhysicsEngine {
     Matter.Body.applyForce(this.player, this.player.position, {
       x: forceX * FORCE_SCALE * multiplyer,
       y: forceY * FORCE_SCALE * multiplyer,
+    });
+
+    this.fields.forEach((field) => {
+      const dx = this.player!.position.x - field.x;
+      const dy = this.player!.position.y - field.y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq < FIELD_RANGE * FIELD_RANGE && distSq > 0) {
+        const dist = Math.sqrt(distSq);
+        const strength = (1 - dist / FIELD_RANGE) * FIELD_FORCE;
+        const sign = field.type === "repulsion" ? 1 : -1;
+        Matter.Body.applyForce(this.player!, this.player!.position, {
+          x: (dx / dist) * strength * sign,
+          y: (dy / dist) * strength * sign,
+        });
+      }
     });
 
     globals.thrustSpeed = this.player.speed;

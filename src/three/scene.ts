@@ -234,6 +234,7 @@ export class SceneManager {
       this.physicsEngine.update(deltatime);
 
       this.player.update(time, deltatime);
+      this.env.update(time);
       this.arrowTarget.update();
       this.camera.update(deltatime);
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { cn } from "../utils/cn";
 
 const Button = ({
@@ -9,7 +10,7 @@ const Button = ({
 }: {
   className?: string;
   onClick: () => void;
-  children: string;
+  children: ReactNode;
   isDisabled?: boolean;
   size?: "sm" | "lg";
 }) => {

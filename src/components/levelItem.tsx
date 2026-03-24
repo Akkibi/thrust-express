@@ -11,6 +11,7 @@ import {
 import { userDataStore } from "../store/userDataStore";
 import type { ILevelScore } from "../types/types";
 import levels from "../levels";
+import { JumpingLetters } from "./jumpingLetters";
 
 export interface LevelItemTypes {
   level: LevelType;
@@ -146,7 +147,7 @@ const LevelItem = ({ level, action }: LevelItemTypes) => {
           }}
           isDisabled={!level.map || !isLastValidated}
         >
-          GO
+          <JumpingLetters text="GO" />
         </Button>
       </div>
     </div>

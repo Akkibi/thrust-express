@@ -22,6 +22,14 @@ def is_green(pixel):
     r, g, b, a = pixel
     return g > 200 and r < 100 and b < 100 and a > 0
 
+def is_pure_blue(pixel):
+    r, g, b, a = pixel
+    return b > 200 and r < 100 and g < 100 and a > 0
+
+def is_yellow(pixel):
+    r, g, b, a = pixel
+    return r > 200 and g > 200 and b < 100 and a > 0
+
 def find_horizontal_lines(grid, width, height):
     optimized_walls = []
     visited = set()
@@ -84,6 +92,8 @@ def process_image(image_path, output_path):
     walls = []
     player = None
     goal = None
+    repulsion_field = []
+    attraction_field = []
 
     # Create a 2D grid to easily manage wall pixels for optimization
     wall_grid = [[False for _ in range(width)] for _ in range(height)]
@@ -102,6 +112,10 @@ def process_image(image_path, output_path):
             player = {"position": {"x": x, "y": y}}
         elif is_green(pixel):
             goal = {"position": {"x": x, "y": y}}
+        elif is_pure_blue(pixel):
+            repulsion_field.append({"position": {"x": x, "y": y}})
+        elif is_yellow(pixel):
+            attraction_field.append({"position": {"x": x, "y": y}})
 
     optimized_walls = find_horizontal_lines(wall_grid, width, height)
 
@@ -110,7 +124,9 @@ def process_image(image_path, output_path):
         # "walls": walls,
         "optimizedWalls": optimized_walls,
         "player": player,
-        "goal": goal
+        "goal": goal,
+        "repulsionField": repulsion_field,
+        "attractionField": attraction_field,
     }
 
     with open(output_path, "w", encoding="utf-8") as f:

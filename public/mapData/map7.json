@@ -236,5 +236,7 @@
       "x": 5,
       "y": 3
     }
-  }
+  },
+  "repulsionField": [],
+  "attractionField": []
 }
