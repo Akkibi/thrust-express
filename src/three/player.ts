@@ -15,10 +15,12 @@ const DEFAULT_SCALE = new THREE.Vector3(0.1, 0.1, 0.1);
 export class Player {
   private static _instance: Player;
   private instanceGroup: THREE.Group;
+  private modelGroup: THREE.Group;
   private body: Matter.Body | null;
   private flames: THREE.Object3D[] = [];
   private package: THREE.Object3D[] = [];
   private packagesDefaultPosition: THREE.Vector3[] = [];
+  private currentShipModel: string = "";
 
   public static getInstance(): Player {
     if (!Player._instance) {
@@ -29,36 +31,50 @@ export class Player {
 
   private constructor() {
     this.body = null;
-    // const width = body.bounds.max.x - body.bounds.min.x;
-    // const height = body.bounds.max.y - body.bounds.min.y;
     this.instanceGroup = new THREE.Group();
-    const groupTranslate = new THREE.Group();
+    this.modelGroup = new THREE.Group();
 
-    loadGLTFModel(groupTranslate, "/models/ship/spaceship.glb").then(
-      (model) => {
-        const elemsArray = find3dElements("flame", model);
-        this.flames.push(...elemsArray);
-        this.flames.forEach((flame) => {
-          flame.visible = false;
-        });
+    this.modelGroup.position.copy(new THREE.Vector3(0, 0, 4));
+    this.instanceGroup.add(this.modelGroup);
 
-        const parcels = find3dElements("package", model);
-        parcels.forEach((parcel) => {
-          this.packagesDefaultPosition.push(parcel.position.clone());
-        });
-        this.package.push(...parcels);
-      },
-    );
-
-    groupTranslate.position.copy(new THREE.Vector3(0, 0, 4));
-    this.instanceGroup.add(groupTranslate);
+    const initialShip = useStore.getState().selectedShipModel;
+    this.currentShipModel = initialShip;
+    this.loadModel(initialShip);
 
     this.instanceGroup.scale.copy(DEFAULT_SCALE);
     SceneManager.getInstance().getScene("main").add(this.instanceGroup);
   }
 
+  private loadModel(shipFile: string): void {
+    this.modelGroup.clear();
+    this.flames = [];
+    this.package = [];
+    this.packagesDefaultPosition = [];
+
+    loadGLTFModel(this.modelGroup, `/models/ship/${shipFile}`).then((model) => {
+      const elemsArray = find3dElements("flame", model);
+      this.flames.push(...elemsArray);
+      this.flames.forEach((flame) => {
+        flame.visible = false;
+      });
+
+      const parcels = find3dElements("package", model);
+      parcels.forEach((parcel) => {
+        this.packagesDefaultPosition.push(parcel.position.clone());
+      });
+      this.package.push(...parcels);
+    });
+  }
+
   public init(body: Matter.Body): void {
     this.body = body;
+
+    const selectedShip = useStore.getState().selectedShipModel;
+    if (selectedShip !== this.currentShipModel) {
+      this.currentShipModel = selectedShip;
+      this.loadModel(selectedShip);
+    }
+
     this.update(0, 0);
     this.instanceGroup.rotation.z = 0;
   }

@@ -4,6 +4,7 @@ import Button from "./button";
 import { useGSAP } from "@gsap/react";
 import SettingsMenu from "./settingsMenu";
 import { JumpingLetters } from "./jumpingLetters";
+import ShipSelector from "./shipSelector";
 
 interface GameMenuTypes {
   isOpen: boolean;
@@ -30,15 +31,7 @@ const GameMenu = ({
   if (!isOpen) return <></>;
 
   return (
-    <div className="absolute inset-0 bg-linear-to-b from-slate-700 to-slate-950 flex flex-col justify-center items-center gap-10 z-30">
-      <video
-        className="absolute w-full h-full object-cover inset-0 z-0"
-        autoPlay
-        loop
-        muted
-        playsInline
-        src="/video-menu.webm"
-      ></video>
+    <div className="absolute inset-0 bg-linear-to-b from-slate-700 to-slate-950 flex flex-col items-center py-8 z-30">
       <div className=" bg-black select-none pointer-events-none absolute top-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain"></div>
       <div className=" bg-black select-none pointer-events-none absolute bottom-0 h-[30vh] opacity-75 right-0 left-0 mask-[url(/border-pattern.png)] mask-repeat-x mask-luminance mask-contain rotate-180"></div>
       <a
@@ -54,21 +47,8 @@ const GameMenu = ({
           filter: "drop-shadow(4px 4px 0px #cf8500)",
         }}
       ></div>
-      <div className="h-full relative">
-        {/*<svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          className="h-50 w-50"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M16 6H13V5L11 3H5L3 5V11L5 13H6V16H0V0H16V6Z"
-            fill="#0000FF"
-          />
-          <path d="M16 16H10V13H11L13 11V10H16V16Z" fill="#0000FF" />
-        </svg>*/}
+      <div className="flex-1 w-full min-h-0 flex items-center justify-center">
+        <ShipSelector />
       </div>
       <div
         className="flex flex-row flex-wrap gap-3 md:gap-10 pb-[10vh] justify-center items-center"

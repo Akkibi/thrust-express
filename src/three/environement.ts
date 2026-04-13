@@ -21,6 +21,7 @@ export class Environement {
   private terrainManager: InstanceObjectManager | null;
   private startEnd: StartEnd;
   private fieldModels: THREE.Group[];
+  private fieldModelZones: THREE.PolarGridHelper[];
   private fieldModelRotators: THREE.Group[];
   // private physicsEngine: PhysicsEngine;
 
@@ -36,6 +37,7 @@ export class Environement {
     this.environementBlocks = [];
     this.fieldModels = [];
     this.fieldModelRotators = [];
+    this.fieldModelZones = [];
     this.startEnd = StartEnd.getInstance();
     this.startEnd.init(this.scene);
   }
@@ -48,6 +50,8 @@ export class Environement {
     this.objectManager = null;
     this.fieldModels.forEach((m) => this.scene.remove(m));
     this.fieldModels = [];
+    this.fieldModelZones.forEach((m) => this.scene.remove(m));
+    this.fieldModelZones = [];
     this.physicsEngine.clearFields();
   };
 
@@ -234,6 +238,7 @@ export class Environement {
       const m = polargrid.material as THREE.Material;
       m.transparent = true;
       m.opacity = 0.25;
+      this.fieldModelZones.push(polargrid);
       group.add(polargrid);
     });
 

@@ -15,6 +15,7 @@ type Store = {
   lastLevel: LevelType | null;
   lastLevelScore: ILevelScore | null;
   isPostProcessingOn: boolean;
+  selectedShipModel: string;
   setIsMenuOpen: (isMenuOpen: boolean) => void;
   setIsThrusting: (isThrusting: boolean) => void;
   setHealth: (health: number) => void;
@@ -22,6 +23,7 @@ type Store = {
   setIsPaused: (isPaused: boolean) => void;
   setIsPostProcessingOn: (isPostProcessingOn: boolean) => void;
   setIsFullscreen: (isFullscreen: boolean) => void;
+  setSelectedShipModel: (model: string) => void;
   isFullscreen: boolean;
 };
 
@@ -43,6 +45,8 @@ export const useStore = create<Store>((set) => ({
   lastLevel: null,
   lastLevelScore: null,
   isFullscreen: false,
+  selectedShipModel:
+    localStorage.getItem("selectedShipModel") ?? "spaceship.glb",
   setIsFullscreen: (isFullscreen: boolean) => set({ isFullscreen }),
   setIsPostProcessingOn: (isPostProcessingOn: boolean) =>
     set({ isPostProcessingOn }),
@@ -53,4 +57,8 @@ export const useStore = create<Store>((set) => ({
   setIsLevelSelectorOpen: (isLevelSelectorOpen: boolean) =>
     set({ isLevelSelectorOpen }),
   setHealth: (health: number) => set({ health }),
+  setSelectedShipModel: (selectedShipModel: string) => {
+    localStorage.setItem("selectedShipModel", selectedShipModel);
+    set({ selectedShipModel });
+  },
 }));

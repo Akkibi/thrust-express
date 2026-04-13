@@ -41,6 +41,7 @@ export class CameraManager {
   }
 
   public setScene = (scene: THREE.Scene) => {
+    this.scene?.remove(this.cameraGroup);
     this.scene = scene;
     this.scene.add(this.cameraGroup);
   };
@@ -115,7 +116,7 @@ export class CameraManager {
   }
 
   public update(deltatime: number): void {
-    if (!this.player) return;
+    if (!this.player || !this.scene) return;
 
     const position = new THREE.Vector3(
       this.player.position.x,
