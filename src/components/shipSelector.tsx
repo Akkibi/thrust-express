@@ -60,7 +60,7 @@ const ShipSelector = () => {
     });
     // false = don't override the CSS width/height (preserves w-full)
     renderer.setSize(w, h, false);
-    renderer.setPixelRatio(window.devicePixelRatio * 0.5);
+    renderer.setPixelRatio(window.devicePixelRatio * 0.25);
 
     // Noise sphere background — Blender shader reconstruction
     const { noiseSphere, shaderOffsetX } = createNoiseBackground();
@@ -104,7 +104,7 @@ const ShipSelector = () => {
         g.rotation.y = time;
       });
       noiseSphere.rotation.y = time - Math.PI * 0.5;
-      shaderOffsetX.value += 0.005;
+      shaderOffsetX.value += 0.02;
       await renderer.renderAsync(scene, camera);
     };
     renderer.init().then(animate);
@@ -164,7 +164,7 @@ const ShipSelector = () => {
       <p className="text-slate-400 text-xs uppercase tracking-widest">
         Select Ship
       </p>
-      <div className="absolute w-full inset-0 flex-1 min-h-0">
+      <div className="absolute w-full inset-0 flex-1 min-h-0 -z-10">
         <canvas
           ref={canvasRef}
           className="w-full h-full"

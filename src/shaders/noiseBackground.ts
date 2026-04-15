@@ -10,6 +10,7 @@ import {
   vec3,
   float,
   uniform,
+  smoothstep,
 } from "three/tsl";
 
 /**
@@ -29,20 +30,21 @@ export function createNoiseBackground(): {
   // Mapping node: Scale=(0.5, 1, 1), Location=(10.5, 0, 0) — X offset animated over time
   const shaderOffsetX = uniform(10.5);
   const mappedPos = positionLocal
-    .mul(vec3(0.5, 1.0, 1.0))
+    .mul(vec3(0.5, 2.0, 2.0))
     .add(vec3(shaderOffsetX, float(0.0), float(0.0)));
 
   // Voronoi (Smooth F1, Scale=5.0) → Distance → smoothstep
   const voronoiDist = mx_worley_noise_float(mappedPos.mul(5.0), float(1.0));
 
   // (voronoiDist * 0.75 + 0.25) * (1 - abs(X)), clamped, inverted, smoothed
-  const factor = voronoiDist
+  const t = voronoiDist
     .mul(4)
-    .add(1.2)
+    .add(0.5)
     .mul(oneMinusAbsX.mul(0.5))
-    .clamp(0.0, 1.0)
-    .smoothstep(0.0, 1.0)
-    .oneMinus();
+    .clamp(0.0, 1.0);
+
+  // const soft = t;
+  const soft = smoothstep(float(0.0), float(0.5), t);
 
   // Color Ramp (Linear):
   // pos=0.00 → #62748E (0.384, 0.455, 0.557)
@@ -56,24 +58,22 @@ export function createNoiseBackground(): {
   const c3 = vec3(0.008, 0.024, 0.094);
   const c4 = vec3(0.0, 0.0, 0.0);
 
-  const t = float(1.0).sub(factor);
-
   const w0 = float(1.0).sub(t.mul(4.0).clamp(0.0, 1.0));
-  const w1 = t
+  const w1 = soft
     .mul(4.0)
     .clamp(0.0, 1.0)
-    .sub(t.sub(0.25).mul(4.0).clamp(0.0, 1.0));
-  const w2 = t
+    .sub(soft.sub(0.25).mul(4.0).clamp(0.0, 1.0));
+  const w2 = soft
     .sub(0.25)
     .mul(4.0)
     .clamp(0.0, 1.0)
-    .sub(t.sub(0.5).mul(4.0).clamp(0.0, 1.0));
-  const w3 = t
+    .sub(soft.sub(0.5).mul(4.0).clamp(0.0, 1.0));
+  const w3 = soft
     .sub(0.5)
     .mul(4.0)
     .clamp(0.0, 1.0)
-    .sub(t.sub(0.75).mul(4.0).clamp(0.0, 1.0));
-  const w4 = t.sub(0.75).mul(4.0).clamp(0.0, 1.0);
+    .sub(soft.sub(0.75).mul(4.0).clamp(0.0, 1.0));
+  const w4 = soft.sub(0.75).mul(4.0).clamp(0.0, 1.0);
 
   noiseMat.colorNode = c0
     .mul(w0)
