@@ -7,19 +7,9 @@ import {
   Group,
   Box3,
   Vector3,
-  Mesh,
-  SphereGeometry,
-  MeshBasicNodeMaterial,
   WebGPURenderer,
-  BackSide,
 } from "three/webgpu";
-import {
-  mx_worley_noise_float,
-  positionLocal,
-  vec3,
-  float,
-  uniform,
-} from "three/tsl";
+import { createNoiseBackground } from "../shaders/noiseBackground";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import gsap from "gsap";
 import { useStore } from "../store/store";
@@ -73,47 +63,7 @@ const ShipSelector = () => {
     renderer.setPixelRatio(window.devicePixelRatio * 0.5);
 
     // Noise sphere background — Blender shader reconstruction
-    const sphereGeo = new SphereGeometry(1, 64, 64);
-    const noiseMat = new MeshBasicNodeMaterial({ side: BackSide });
-
-    // Texture Coordinate (Object) → Separate XYZ → abs(X) → 1 - abs(X)
-    const oneMinusAbsX = float(1.0).sub(positionLocal.x.abs());
-
-    // Mapping node: Scale=(0.5, 1, 1), Location=(10.5, 0, 0) — X offset animated over time
-    const shaderOffsetX = uniform(10.5);
-    const mappedPos = positionLocal
-      .mul(vec3(0.5, 1.0, 1.0))
-      .add(vec3(shaderOffsetX, float(0.0), float(0.0)));
-
-    // Voronoi (Smooth F1, Scale=5.0) → Distance → * 2.0
-    const voronoiDist = mx_worley_noise_float(mappedPos.mul(5.0), float(1.0));
-
-    // Math: (voronoiDist * 2.0) * (1 - abs(X)), clamped for color ramp input
-    const factor = voronoiDist.mul(2.0).mul(oneMinusAbsX).clamp(0.0, 1.0);
-
-    // Color Ramp (Linear):
-    // pos=0.00 → (0.122, 0.175, 0.270)
-    // pos=0.25 → (0.019, 0.037, 0.105)
-    // pos=0.50 → (0.005, 0.009, 0.024)
-    // pos=0.75 → (0.019, 0.037, 0.105) — estimated (truncated in source)
-    const c0 = vec3(0.122, 0.175, 0.27);
-    const c1 = vec3(0.019, 0.037, 0.105);
-    const c2 = vec3(0.005, 0.009, 0.024);
-    const c3 = vec3(0.019, 0.037, 0.105);
-
-    // Invert factor so low voronoi values (most of the sphere) map to the bright end
-    const t = float(1.0).sub(factor);
-
-    // Linear color ramp: chain mixes with clamped offsets, no hard step() switches
-    // Each .mix() layer activates smoothly once t crosses the next stop position
-    noiseMat.colorNode = c0
-      .mix(c1, t.mul(4.0).clamp(0.0, 1.0)) // c0→c1 over [0.00, 0.25]
-      .mix(c2, t.sub(0.25).mul(4.0).clamp(0.0, 1.0)) // →c2 over [0.25, 0.50]
-      .mix(c3, t.sub(0.5).mul(4.0).clamp(0.0, 1.0)); // →c3 over [0.50, 0.75]
-
-    const noiseSphere = new Mesh(sphereGeo, noiseMat);
-    noiseSphere.scale.set(90, 9, 9);
-    noiseSphere.position.set(0, 0, 0);
+    const { noiseSphere, shaderOffsetX } = createNoiseBackground();
     scene.add(noiseSphere);
 
     // Lighting
