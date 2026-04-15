@@ -99,7 +99,7 @@ const ShipSelector = () => {
     let time = 0;
     const animate = async () => {
       animFrameRef.current = requestAnimationFrame(animate);
-      time += 0.008;
+      time += 0.01;
       shipGroupsRef.current.forEach((g) => {
         g.rotation.y = time;
       });
