@@ -18,7 +18,7 @@ import {
  */
 export function createNoiseBackground(): {
   noiseSphere: Mesh;
-  shaderOffsetX: ReturnType<typeof uniform>;
+  shaderOffsetX: { value: number };
 } {
   const sphereGeo = new SphereGeometry(1, 64, 64);
   const noiseMat = new MeshBasicNodeMaterial({ side: BackSide });
