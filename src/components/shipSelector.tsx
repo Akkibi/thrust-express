@@ -170,35 +170,34 @@ const ShipSelector = () => {
           className="w-full h-full"
           style={{ display: "block" }}
         />
-
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          disabled={selectedIndex === 0}
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 custom-light-border flex items-center justify-center disabled:opacity-25 hover:scale-110 active:scale-90 transition-transform duration-200"
-        >
-          <svg fill="white" className="w-4 h-4" viewBox="0 0 42 42">
-            <polygon
-              fillRule="evenodd"
-              points="27.066,1 7,21.068 26.568,40.637 31.502,35.704 16.865,21.068 32,5.933"
-            />
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => navigate(1)}
-          disabled={selectedIndex === SHIPS.length - 1}
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 custom-light-border flex items-center justify-center disabled:opacity-25 hover:scale-110 active:scale-90 transition-transform duration-200"
-        >
-          <svg fill="white" className="w-4 h-4 rotate-180" viewBox="0 0 42 42">
-            <polygon
-              fillRule="evenodd"
-              points="27.066,1 7,21.068 26.568,40.637 31.502,35.704 16.865,21.068 32,5.933"
-            />
-          </svg>
-        </button>
       </div>
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        disabled={selectedIndex === 0}
+        className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 custom-light-border flex items-center justify-center disabled:opacity-25 hover:scale-110 active:scale-90 transition-transform duration-200"
+      >
+        <svg fill="white" className="w-4 h-4" viewBox="0 0 42 42">
+          <polygon
+            fillRule="evenodd"
+            points="27.066,1 7,21.068 26.568,40.637 31.502,35.704 16.865,21.068 32,5.933"
+          />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => navigate(1)}
+        disabled={selectedIndex === SHIPS.length - 1}
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900 custom-light-border flex items-center justify-center disabled:opacity-25 hover:scale-110 active:scale-90 transition-transform duration-200"
+      >
+        <svg fill="white" className="w-4 h-4 rotate-180" viewBox="0 0 42 42">
+          <polygon
+            fillRule="evenodd"
+            points="27.066,1 7,21.068 26.568,40.637 31.502,35.704 16.865,21.068 32,5.933"
+          />
+        </svg>
+      </button>
 
       <div className="flex flex-col gap-2 relative z-10 w-full justify-center items-center">
         <p className="text-white font-black uppercase text-lg tracking-wider custom-text-border">
