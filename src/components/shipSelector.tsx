@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  WebGLRenderer,
   Scene,
   PerspectiveCamera,
   AmbientLight,
@@ -8,7 +7,19 @@ import {
   Group,
   Box3,
   Vector3,
-} from "three";
+  Mesh,
+  SphereGeometry,
+  MeshBasicNodeMaterial,
+  WebGPURenderer,
+  BackSide,
+} from "three/webgpu";
+import {
+  mx_worley_noise_float,
+  positionLocal,
+  vec3,
+  float,
+  uniform,
+} from "three/tsl";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import gsap from "gsap";
 import { useStore } from "../store/store";
@@ -21,10 +32,10 @@ const SHIPS = [
   { file: "spaceship5.glb", name: "Titan" },
 ];
 
-const SHIP_SPACING = 5;
+const SHIP_SPACING = 2;
 
 const getScale = (dist: number) =>
-  dist === 0 ? 0.576 : Math.max(0.176, 0.416 - Math.abs(dist) * 0.096);
+  dist === 0 ? 0.3 : Math.max(0.06, 0.2 - Math.abs(dist) * 0.04);
 
 const ShipSelector = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,14 +64,57 @@ const ShipSelector = () => {
     camera.position.set(0, 1.5, 9);
     camera.lookAt(0, 0.5, 0);
 
-    const renderer = new WebGLRenderer({
+    const renderer = new WebGPURenderer({
       canvas,
       antialias: true,
-      alpha: true,
     });
     // false = don't override the CSS width/height (preserves w-full)
     renderer.setSize(w, h, false);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(window.devicePixelRatio * 0.5);
+
+    // Noise sphere background — Blender shader reconstruction
+    const sphereGeo = new SphereGeometry(1, 64, 64);
+    const noiseMat = new MeshBasicNodeMaterial({ side: BackSide });
+
+    // Texture Coordinate (Object) → Separate XYZ → abs(X) → 1 - abs(X)
+    const oneMinusAbsX = float(1.0).sub(positionLocal.x.abs());
+
+    // Mapping node: Scale=(0.5, 1, 1), Location=(10.5, 0, 0) — X offset animated over time
+    const shaderOffsetX = uniform(10.5);
+    const mappedPos = positionLocal
+      .mul(vec3(0.5, 1.0, 1.0))
+      .add(vec3(shaderOffsetX, float(0.0), float(0.0)));
+
+    // Voronoi (Smooth F1, Scale=5.0) → Distance → * 2.0
+    const voronoiDist = mx_worley_noise_float(mappedPos.mul(5.0), float(1.0));
+
+    // Math: (voronoiDist * 2.0) * (1 - abs(X)), clamped for color ramp input
+    const factor = voronoiDist.mul(2.0).mul(oneMinusAbsX).clamp(0.0, 1.0);
+
+    // Color Ramp (Linear):
+    // pos=0.00 → (0.122, 0.175, 0.270)
+    // pos=0.25 → (0.019, 0.037, 0.105)
+    // pos=0.50 → (0.005, 0.009, 0.024)
+    // pos=0.75 → (0.019, 0.037, 0.105) — estimated (truncated in source)
+    const c0 = vec3(0.122, 0.175, 0.27);
+    const c1 = vec3(0.019, 0.037, 0.105);
+    const c2 = vec3(0.005, 0.009, 0.024);
+    const c3 = vec3(0.019, 0.037, 0.105);
+
+    // Invert factor so low voronoi values (most of the sphere) map to the bright end
+    const t = float(1.0).sub(factor);
+
+    // Linear color ramp: chain mixes with clamped offsets, no hard step() switches
+    // Each .mix() layer activates smoothly once t crosses the next stop position
+    noiseMat.colorNode = c0
+      .mix(c1, t.mul(4.0).clamp(0.0, 1.0)) // c0→c1 over [0.00, 0.25]
+      .mix(c2, t.sub(0.25).mul(4.0).clamp(0.0, 1.0)) // →c2 over [0.25, 0.50]
+      .mix(c3, t.sub(0.5).mul(4.0).clamp(0.0, 1.0)); // →c3 over [0.50, 0.75]
+
+    const noiseSphere = new Mesh(sphereGeo, noiseMat);
+    noiseSphere.scale.set(90, 9, 9);
+    noiseSphere.position.set(0, 0, 0);
+    scene.add(noiseSphere);
 
     // Lighting
     scene.add(new AmbientLight(0xffffff, 0.7));
@@ -93,15 +147,17 @@ const ShipSelector = () => {
     });
 
     let time = 0;
-    const animate = () => {
+    const animate = async () => {
       animFrameRef.current = requestAnimationFrame(animate);
       time += 0.008;
       shipGroupsRef.current.forEach((g) => {
         g.rotation.y = time;
       });
-      renderer.render(scene, camera);
+      noiseSphere.rotation.y = time - Math.PI * 0.5;
+      shaderOffsetX.value += 0.005;
+      await renderer.renderAsync(scene, camera);
     };
-    animate();
+    renderer.init().then(animate);
 
     const onResize = () => {
       const w2 = canvas.offsetWidth;
@@ -154,7 +210,7 @@ const ShipSelector = () => {
   };
 
   return (
-    <div className="w-full max-w-full h-full flex-col items-center gap-2 py-4 relative flex justify-between">
+    <div className="w-full max-w-full h-full flex-col items-center gap-2 py-4 flex justify-between">
       <p className="text-slate-400 text-xs uppercase tracking-widest">
         Select Ship
       </p>
