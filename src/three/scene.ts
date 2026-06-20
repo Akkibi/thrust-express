@@ -96,50 +96,23 @@ export class SceneManager {
     this.colorShift = uniform(1);
     const screenUV = uv();
 
+    const sinX = screenUV.x.add(1.05).sin();
+
     const shiftedRedUV = screenUV.add(
-      vec2(
-        0.0,
-        screenUV.x
-          .add(1.05)
-          .sin()
-          .mul(mul(this.colorShift, 0.15))
-          .sub(mul(this.colorShift, 0.15)),
-      ),
+      vec2(0.0, sinX.sub(1.0).mul(mul(this.colorShift, 0.15))),
     );
-
     const shiftedGreenUV = screenUV.add(
-      vec2(
-        0.0,
-        screenUV.x
-          .add(1.05)
-          .sin()
-          .mul(mul(this.colorShift, 0.1))
-          .sub(mul(this.colorShift, 0.1)),
-      ),
+      vec2(0.0, sinX.sub(1.0).mul(mul(this.colorShift, 0.1))),
+    );
+    const shiftedBlueUV = screenUV.add(
+      vec2(0.0, sinX.sub(1.0).mul(mul(this.colorShift, 0.05))),
     );
 
-    const shiftedBlueUV = screenUV.add(
-      vec2(
-        0.0,
-        screenUV.x
-          .add(1.05)
-          .sin()
-          .mul(mul(this.colorShift, 0.05))
-          .sub(mul(this.colorShift, 0.05)),
-      ),
-    );
     const shiftRed = scenePassTexture.sample(shiftedRedUV);
     const shiftGreen = scenePassTexture.sample(shiftedGreenUV);
     const shiftBlue = scenePassTexture.sample(shiftedBlueUV);
 
-    const originalColor = scenePassTexture.sample(screenUV);
-
-    const finalColor = vec4(
-      shiftRed.r,
-      shiftGreen.g,
-      shiftBlue.b,
-      originalColor.a,
-    );
+    const finalColor = vec4(shiftRed.r, shiftGreen.g, shiftBlue.b, 1.0);
 
     this.postProcessing.outputNode = finalColor;
 
